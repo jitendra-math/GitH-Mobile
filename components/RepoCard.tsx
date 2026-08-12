@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Lock, Globe, Download, Trash2, CircleDot, Database } from "lucide-react";
+import { Download, Trash2, Code2 } from "lucide-react";
 import { deleteRepo } from "@/actions/github";
 
 export default function RepoCard({ repo }: { repo: any }) {
@@ -10,7 +10,12 @@ export default function RepoCard({ repo }: { repo: any }) {
   const [loading, setLoading] = useState(false);
 
   const formatSize = (kb: number) => {
-    return kb >= 1024 ? (kb / 1024).toFixed(1) + " MB" : kb + " KB";
+    if (!kb || kb === 0) return '0 KB';
+    if (kb < 1024) return `${Number(kb.toFixed(2))} KB`;
+    const mb = kb / 1024;
+    if (mb < 1024) return `${mb.toFixed(2)} MB`;
+    const gb = mb / 1024;
+    return `${gb.toFixed(2)} GB`;
   };
 
   const handleDelete = async () => {
@@ -32,69 +37,60 @@ export default function RepoCard({ repo }: { repo: any }) {
     window.open(`${repo.html_url}/archive/refs/heads/${defaultBranch}.zip`);
   };
 
-  // Language ke hisaab se dynamic colors
-  const languageColors: Record<string, string> = {
-    TypeScript: "bg-blue-50 text-blue-600 border-blue-200",
-    JavaScript: "bg-yellow-50 text-yellow-700 border-yellow-200",
-    Python: "bg-emerald-50 text-emerald-600 border-emerald-200",
-    HTML: "bg-orange-50 text-orange-600 border-orange-200",
-    CSS: "bg-indigo-50 text-indigo-600 border-indigo-200",
-    Java: "bg-red-50 text-red-600 border-red-200",
-  };
-  
-  // Agar koi aur language ho toh default color
-  const langStyle = repo.language 
-    ? (languageColors[repo.language] || "bg-slate-50 text-slate-600 border-slate-200") 
-    : "";
-
   return (
-    <div className="flex items-start justify-between p-3.5 bg-white rounded-lg border border-slate-200 shadow-sm hover:border-slate-300 transition-all">
-      <div className="flex flex-col gap-1.5 overflow-hidden mr-3 w-full">
-        {/* Header: Name + Visibility */}
-        <div className="flex items-center gap-2">
-          <h3 className="text-[15px] font-semibold text-slate-800 truncate">{repo.name}</h3>
-          <span className="shrink-0">
-            {repo.private ? <Lock className="h-3 w-3 text-amber-500" /> : <Globe className="h-3 w-3 text-blue-500" />}
-          </span>
-        </div>
-
-        {/* Description */}
-        {repo.description && (
-          <p className="text-[13px] text-slate-500 line-clamp-1">{repo.description}</p>
-        )}
-
-        {/* Meta Info (Stack + Size) with Colors */}
-        <div className="flex items-center gap-2 mt-1">
-          {repo.language && (
-            <div className={`flex items-center gap-1 px-2 py-0.5 rounded-md border ${langStyle}`}>
-              <CircleDot className="h-2.5 w-2.5" />
-              <span className="text-[10px] font-semibold tracking-wide uppercase">{repo.language}</span>
-            </div>
-          )}
-          <div className="flex items-center gap-1 px-2 py-0.5 rounded-md border bg-emerald-50 text-emerald-600 border-emerald-200">
-            <Database className="h-2.5 w-2.5" />
-            <span className="text-[10px] font-semibold tracking-wide uppercase">{formatSize(repo.size)}</span>
+    <div className="p-4 bg-white rounded-xl border border-[#d6d1c4] hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06),_0_0_0_1px_rgba(0,0,0,0.02)] hover:border-[rgba(181,172,138,0.4)] transition-all duration-200">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+        
+        {/* Header: Name + Badges */}
+        <div className="flex flex-col gap-1.5 min-w-0">
+          <div className="text-[15px] font-semibold text-[#1A1A1A] break-words leading-[1.3]">
+            {repo.name}
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-1.5">
+            {repo.private ? (
+              <span className="text-[11px] px-[10px] py-[3px] rounded-full font-semibold whitespace-nowrap leading-none shrink-0 text-[#ff3b30] bg-[#ff3b30]/10">
+                Private
+              </span>
+            ) : (
+              <span className="text-[11px] px-[10px] py-[3px] rounded-full font-semibold whitespace-nowrap leading-none shrink-0 text-[#34c759] bg-[#34c759]/10">
+                Public
+              </span>
+            )}
+            
+            {repo.language && (
+              <span className="flex items-center gap-1 text-[11px] px-[10px] py-[3px] rounded-full font-semibold whitespace-nowrap leading-none shrink-0 text-[#4A4A4A] bg-black/5">
+                <Code2 className="w-3 h-3" />
+                {repo.language}
+              </span>
+            )}
+            
+            <span className="text-[11px] px-[10px] py-[3px] rounded-full font-semibold whitespace-nowrap leading-none shrink-0 text-[#4A4A4A] bg-black/5">
+              {formatSize(repo.size)}
+            </span>
           </div>
         </div>
-      </div>
 
-      {/* Buttons (Right side) */}
-      <div className="flex flex-col gap-2 shrink-0 pt-0.5">
-        <button 
-          onClick={handleDownload}
-          className="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-md transition-colors"
-          title="Download Zip"
-        >
-          <Download className="h-4 w-4" />
-        </button>
-        <button 
-          onClick={handleDelete}
-          disabled={loading}
-          className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
-          title="Delete Repository"
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
+        {/* Buttons (Right side) */}
+        <div className="flex items-center gap-2 shrink-0 justify-end">
+          <button 
+            onClick={handleDownload}
+            className="w-10 h-10 flex items-center justify-center p-0 rounded-xl bg-black/5 text-[#4A4A4A] border-none cursor-pointer transition-all duration-150 hover:bg-[#6D001A]/10 hover:text-[#6D001A] hover:scale-[1.08]"
+            title="Download ZIP"
+          >
+            <Download className="w-5 h-5 stroke-2" />
+          </button>
+          
+          <button 
+            onClick={handleDelete}
+            disabled={loading}
+            className="w-10 h-10 flex items-center justify-center p-0 rounded-xl bg-black/5 text-[#4A4A4A] border-none cursor-pointer transition-all duration-150 hover:bg-[#ff3b30]/10 hover:text-[#ff3b30] hover:scale-[1.08] disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Delete Repository"
+          >
+            <Trash2 className="w-5 h-5 stroke-2" />
+          </button>
+        </div>
+
       </div>
     </div>
   );
