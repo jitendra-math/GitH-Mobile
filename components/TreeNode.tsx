@@ -10,10 +10,14 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   
-  const { owner, repo, branch, addToQueue } = useEditStore();
+  // Yahan queue ko bhi store se nikal liya hai
+  const { owner, repo, branch, addToQueue, queue } = useEditStore();
 
   const isFolder = nodeData._info.type === "tree";
   const info = nodeData._info;
+
+  // Check if current file is in the commit queue
+  const queuedItem = !isFolder ? queue.find(q => q.path === info.path) : null;
 
   const handleCopy = async () => {
     setLoading(true);
@@ -21,7 +25,7 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
       const data = await getFileContent(owner, repo, info.path, branch);
       const decoded = decodeBase64(data.content);
       await navigator.clipboard.writeText(decoded);
-      alert("Copied to clipboard!");
+      // Alert hata diya gaya hai jaisa tumne kaha tha
     } catch (err: any) {
       alert("Copy failed: " + err.message);
     } finally {
@@ -76,8 +80,19 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
           <div className="flex items-center gap-2.5 flex-1 min-w-0">
             <FileText className="w-[18px] h-[18px] text-[#8a8a8a] shrink-0 group-hover:text-[#6D001A] transition-colors" />
             <div className="flex flex-col min-w-0">
-              <span className="font-medium text-[14px] truncate text-[#1A1A1A]">{nodeName}</span>
-              <span className="text-[11px] text-[#8a8a8a] font-mono opacity-75">{formatSize((info.size || 0) / 1024)}</span>
+              <span className={`font-medium text-[14px] truncate ${queuedItem?.isDelete ? 'line-through text-[#ff3b30] opacity-75' : 'text-[#1A1A1A]'}`}>
+                {nodeName}
+              </span>
+              <span className="text-[11px] text-[#8a8a8a] font-mono opacity-75">
+                {formatSize((info.size || 0) / 1024)}
+                
+                {/* Size Difference Logic */}
+                {queuedItem && queuedItem.sizeDiff !== undefined && queuedItem.sizeDiff !== 0 && (
+                  <span className={`ml-1.5 font-bold ${queuedItem.sizeDiff > 0 ? "text-[#34c759]" : "text-[#ff3b30]"}`}>
+                    {queuedItem.sizeDiff > 0 ? "+" : ""}{(queuedItem.sizeDiff / 1024).toFixed(2)} KB
+                  </span>
+                )}
+              </span>
             </div>
           </div>
         )}
