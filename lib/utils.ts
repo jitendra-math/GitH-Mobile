@@ -34,6 +34,22 @@ export function encodeBase64(text: string) {
   }
 }
 
+// 👇 NEW HELPER: Convert File to base64 (supports binary)
+export function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      // result is a base64 data URL like "data:image/png;base64,...."
+      const dataUrl = reader.result as string;
+      // Remove the prefix (e.g., "data:image/png;base64,")
+      const base64 = dataUrl.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = (error) => reject(error);
+    reader.readAsDataURL(file);
+  });
+}
+
 // Generate ASCII Tree Structure String
 export function generateTreeText(node: any, prefix = ""): string {
   let text = "";

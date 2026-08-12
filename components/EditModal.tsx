@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { X, Copy, CopyCheck, History, ArrowLeft } from "lucide-react";
+import { X, Copy, CopyCheck, History, ArrowLeft, Upload } from "lucide-react"; // <-- Upload added
 import { useEditStore } from "@/store/useEditStore";
 import { getRepoTree, commitMultipleFiles, fetchCommitHistory, rollbackToCommit } from "@/actions/github";
 import { generateTreeText } from "@/lib/utils";
@@ -9,6 +9,7 @@ import TreeNode from "./TreeNode";
 import BulkActionModal from "./BulkActionModal";
 import AlertModal from "./AlertModal";
 import RollbackPromptModal from "./RollbackPromptModal";
+import UploadModal from "./UploadModal"; // <-- new import
 
 export default function EditModal() {
   const { isOpen, owner, repo, branch, queue, closeModal, removeFromQueue, clearQueue } = useEditStore();
@@ -23,6 +24,7 @@ export default function EditModal() {
   const [committing, setCommitting] = useState(false);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [copiedStructure, setCopiedStructure] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false); // <-- new state
 
   // Custom Modal States
   const [alertConfig, setAlertConfig] = useState({ isOpen: false, message: "", type: "info" as any });
@@ -175,6 +177,15 @@ export default function EditModal() {
                 <span>Bulk Actions</span>
               </button>
 
+              {/* 👇 NEW UPLOAD BUTTON */}
+              <button 
+                onClick={() => setIsUploadModalOpen(true)} 
+                className="h-8 px-3 flex items-center gap-1.5 rounded-lg bg-[#6D001A] text-white hover:bg-[#8B0022] transition-colors text-[12px] font-semibold shadow-sm shrink-0"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span>Upload</span>
+              </button>
+
               <button onClick={handleCopyStructure} className={`h-8 px-3 flex items-center gap-1.5 rounded-lg transition-colors text-[12px] font-semibold shadow-sm shrink-0 ${copiedStructure ? 'bg-[#34c759] text-white' : 'bg-white border border-[rgba(181,172,138,0.4)] text-[#4A4A4A] hover:bg-[#e6e0d4]'}`}>
                 <Copy className="w-3.5 h-3.5" />
                 <span>{copiedStructure ? "Copied!" : "Copy Structure"}</span>
@@ -295,6 +306,12 @@ export default function EditModal() {
         loading={isRollingBack}
         onCancel={() => setRollbackConfig({ ...rollbackConfig, isOpen: false })}
         onConfirm={executeRollback}
+      />
+      
+      {/* 👇 NEW UPLOAD MODAL */}
+      <UploadModal 
+        isOpen={isUploadModalOpen} 
+        onClose={() => setIsUploadModalOpen(false)} 
       />
     </>
   );
