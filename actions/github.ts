@@ -30,6 +30,11 @@ export async function saveToken(formData: FormData) {
   redirect("/dashboard");
 }
 
+export async function logoutUser() {
+  cookies().delete("github_pat");
+  redirect("/");
+}
+
 export async function getRepos() {
   const token = cookies().get("github_pat")?.value;
   if (!token) redirect("/");
