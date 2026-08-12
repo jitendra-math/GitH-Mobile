@@ -33,3 +33,31 @@ export function encodeBase64(text: string) {
     throw new Error("Base64 encode failed.");
   }
 }
+
+// Generate ASCII Tree Structure String
+export function generateTreeText(node: any, prefix = ""): string {
+  let text = "";
+  const keys = Object.keys(node).filter(k => k !== "_info").sort();
+  keys.forEach((key, index) => {
+    const child = node[key];
+    const isLast = index === keys.length - 1;
+    const isFolder = child._info?.type === "tree";
+    const connector = isLast ? "└── " : "├── ";
+    const info = child._info;
+    const isFile = info?.type !== "tree";
+    let label = key;
+
+    if (isFile) {
+      const sizeKB = (info?.size || 0) / 1024;
+      const formattedSize = formatSize(sizeKB);
+      label += ` (${formattedSize})`;
+    }
+
+    text += prefix + connector + label + "\n";
+    if (isFolder) {
+      const newPrefix = prefix + (isLast ? "    " : "│   ");
+      text += generateTreeText(child, newPrefix);
+    }
+  });
+  return text;
+}
