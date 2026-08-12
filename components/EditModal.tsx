@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { X } from "lucide-react";
 import { useEditStore } from "@/store/useEditStore";
 import { getRepoTree, commitMultipleFiles } from "@/actions/github";
@@ -12,31 +12,44 @@ export default function EditModal() {
   const [loading, setLoading] = useState(false);
   const [committing, setCommitting] = useState(false);
 
+  // Helper function to format byte differences
+  const formatDiff = (bytes?: number) => {
+    if (bytes === undefined) return null;
+    const kb = (Math.abs(bytes) / 1024).toFixed(2);
+    if (bytes > 0) return <span className="text-[#34c759] bg-[#34c759]/10 px-1.5 py-0.5 rounded text-[10px] ml-2">+{kb} KB</span>;
+    if (bytes < 0) return <span className="text-[#ff3b30] bg-[#ff3b30]/10 px-1.5 py-0.5 rounded text-[10px] ml-2">-{kb} KB</span>;
+    return <span className="text-[#8a8a8a] bg-black/5 px-1.5 py-0.5 rounded text-[10px] ml-2">0 KB</span>;
+  };
+
+  // Reusable function to fetch/refresh the tree
+  const loadTree = useCallback(() => {
+    setLoading(true);
+    setTreeData(null);
+    getRepoTree(owner, repo, branch)
+      .then((flatTree) => {
+        const root: any = {};
+        flatTree.forEach((item: any) => {
+          if (!item.path) return;
+          const parts = item.path.split("/");
+          let current = root;
+          parts.forEach((part: string, i: number) => {
+            if (!current[part]) {
+              current[part] = { _info: i === parts.length - 1 ? item : { type: "tree", path: parts.slice(0, i + 1).join("/") } };
+            }
+            current = current[part];
+          });
+        });
+        setTreeData(root);
+      })
+      .catch(() => alert("Failed to load file structure."))
+      .finally(() => setLoading(false));
+  }, [owner, repo, branch]);
+
   useEffect(() => {
     if (isOpen) {
-      setLoading(true);
-      setTreeData(null);
-      getRepoTree(owner, repo, branch)
-        .then((flatTree) => {
-          // Convert flat GitHub tree to Nested Object Tree
-          const root: any = {};
-          flatTree.forEach((item: any) => {
-            if (!item.path) return;
-            const parts = item.path.split("/");
-            let current = root;
-            parts.forEach((part: string, i: number) => {
-              if (!current[part]) {
-                current[part] = { _info: i === parts.length - 1 ? item : { type: "tree", path: parts.slice(0, i + 1).join("/") } };
-              }
-              current = current[part];
-            });
-          });
-          setTreeData(root);
-        })
-        .catch(() => alert("Failed to load file structure."))
-        .finally(() => setLoading(false));
+      loadTree();
     }
-  }, [isOpen, owner, repo, branch]);
+  }, [isOpen, loadTree]);
 
   const handleCommit = async () => {
     if (queue.length === 0) return alert("Queue is empty");
@@ -47,7 +60,9 @@ export default function EditModal() {
       const res = await commitMultipleFiles(owner, repo, branch, queue);
       if (res.error) throw new Error(res.error);
       alert("Commit successful 🚀");
-      closeModal();
+      clearQueue();
+      // Auto-refresh the tree instead of closing the modal
+      loadTree(); 
     } catch (err: any) {
       alert("Commit failed: " + err.message);
     } finally {
@@ -58,7 +73,7 @@ export default function EditModal() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-8 pb-4 px-4 bg-[#1A1A1A]/35 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[999] flex items-start justify-center pt-8 pb-4 px-4 bg-[#1A1A1A]/35 backdrop-blur-md animate-in fade-in duration-200">
       <div className="flex flex-col bg-[#F5F1EC]/90 backdrop-blur-xl w-full max-w-[880px] max-h-[calc(100vh-48px)] rounded-[18px] shadow-[0_12px_32px_rgba(0,0,0,0.08),_0_0_0_1px_rgba(0,0,0,0.03)] border border-white/60 overflow-hidden animate-in slide-in-from-bottom-4 zoom-in-95 duration-300">
         
         {/* Header */}
@@ -94,10 +109,14 @@ export default function EditModal() {
             ) : (
               queue.map((item) => (
                 <div key={item.path} className={`flex items-center justify-between p-2 rounded-lg bg-[#F5F1EC] border border-[rgba(181,172,138,0.25)] ${item.isDelete ? "border-l-2 border-l-[#ff3b30]" : ""}`}>
-                  <span className="text-[12px] font-mono text-[#1A1A1A] truncate pr-4">
-                    {item.isDelete && <span className="text-[#ff3b30] font-bold mr-1">[DEL]</span>}
-                    {item.path}
-                  </span>
+                  <div className="flex items-center truncate pr-4">
+                    <span className="text-[12px] font-mono text-[#1A1A1A] truncate">
+                      {item.isDelete && <span className="text-[#ff3b30] font-bold mr-1">[DEL]</span>}
+                      {item.path}
+                    </span>
+                    {/* Size Difference Badge */}
+                    {formatDiff(item.sizeDiff)}
+                  </div>
                   <button onClick={() => removeFromQueue(item.path)} className="w-6 h-6 flex items-center justify-center rounded-md bg-[#ff3b30]/10 text-[#ff3b30] hover:bg-[#ff3b30] hover:text-white transition-all shrink-0">
                     <X className="w-[14px] h-[14px]" />
                   </button>

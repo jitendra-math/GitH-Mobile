@@ -35,8 +35,13 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
       if (!text) return alert("Clipboard is empty!");
       if (!confirm(`Replace "${info.path}" with clipboard content?`)) return;
 
+      // Calculate size difference
+      const oldSize = info.size || 0;
+      const newSize = new Blob([text]).size;
+      const sizeDiff = newSize - oldSize;
+
       const contentBase64 = encodeBase64(text);
-      addToQueue({ path: info.path, sha: info.sha, contentBase64, isDelete: false });
+      addToQueue({ path: info.path, sha: info.sha, contentBase64, isDelete: false, sizeDiff });
     } catch (err: any) {
       alert("Replace failed: " + err.message);
     }
@@ -44,7 +49,10 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
 
   const handleDelete = () => {
     if (!confirm(`Delete "${info.path}"? It will be added to the queue.`)) return;
-    addToQueue({ path: info.path, sha: info.sha, isDelete: true });
+    
+    // For delete, the difference is entirely the negative old size
+    const oldSize = info.size || 0;
+    addToQueue({ path: info.path, sha: info.sha, isDelete: true, sizeDiff: -oldSize });
   };
 
   const childKeys = Object.keys(nodeData).filter(k => k !== "_info").sort((a, b) => {

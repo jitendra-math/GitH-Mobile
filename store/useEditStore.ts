@@ -5,6 +5,7 @@ export type QueueItem = {
   sha: string | null; // null means delete
   contentBase64?: string;
   isDelete?: boolean;
+  sizeDiff?: number; // Added to track size changes (in bytes)
 };
 
 interface EditState {
