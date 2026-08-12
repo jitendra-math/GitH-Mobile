@@ -39,52 +39,38 @@ export default function RepoCard({ repo }: { repo: any }) {
     window.open(`${repo.html_url}/archive/refs/heads/${defaultBranch}.zip`);
   };
 
-  const languageColors: Record<string, string> = {
-    TypeScript: "text-blue-600 bg-blue-50 border border-blue-100",
-    JavaScript: "text-amber-600 bg-amber-50 border border-amber-100",
-    Python: "text-emerald-600 bg-emerald-50 border border-emerald-100",
-    HTML: "text-orange-600 bg-orange-50 border border-orange-100",
-    CSS: "text-indigo-600 bg-indigo-50 border border-indigo-100",
-    Java: "text-red-600 bg-red-50 border border-red-100",
-    PHP: "text-purple-600 bg-purple-50 border border-purple-100",
-  };
-
-  const langStyle = repo.language 
-    ? (languageColors[repo.language] || "text-[#4A4A4A] bg-white border border-[#d6d1c4]") 
-    : "";
-
   return (
     <div className="flex flex-col bg-white rounded-xl border border-[#d6d1c4] hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06),_0_0_0_1px_rgba(0,0,0,0.02)] hover:border-[rgba(181,172,138,0.4)] transition-all duration-200 overflow-hidden">
       
-      {/* Upper Section: Repo Info & Badges (Light Ivory Background) */}
-      <div className="bg-[#F5F1EC] p-3.5 flex flex-col gap-2.5">
-        <div className="text-[14px] font-semibold text-[#1A1A1A] leading-snug break-words">
+      {/* Upper Section: Repo Info & Badges Inline (Light Ivory Background) */}
+      <div className="bg-[#F5F1EC] p-3.5 flex flex-wrap items-center gap-2">
+        
+        {/* Repo Name */}
+        <div className="text-[14px] font-semibold text-[#1A1A1A] leading-snug break-words mr-1">
           {repo.name}
         </div>
         
-        {/* Badges Ribbon */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          {repo.private ? (
-            <span className="text-[10px] px-2 py-0.5 rounded-md font-bold tracking-wide uppercase whitespace-nowrap leading-none shrink-0 text-[#ff3b30] bg-white border border-[#ff3b30]/20">
-              Private
-            </span>
-          ) : (
-            <span className="text-[10px] px-2 py-0.5 rounded-md font-bold tracking-wide uppercase whitespace-nowrap leading-none shrink-0 text-[#34c759] bg-white border border-[#34c759]/20">
-              Public
-            </span>
-          )}
-          
-          {repo.language && (
-            <span className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md font-bold tracking-wide uppercase whitespace-nowrap leading-none shrink-0 ${langStyle}`}>
-              <Code2 className="w-3 h-3" />
-              {repo.language}
-            </span>
-          )}
-          
-          <span className="text-[10px] px-2 py-0.5 rounded-md font-bold tracking-wide uppercase whitespace-nowrap leading-none shrink-0 text-[#4A4A4A] bg-white border border-[#d6d1c4]">
-            {formatSize(repo.size)}
+        {/* Badges (Fully rounded & uniform colors) */}
+        {repo.private ? (
+          <span className="text-[10px] px-2.5 py-0.5 rounded-full font-bold tracking-wide uppercase whitespace-nowrap leading-none shrink-0 text-[#ff3b30] bg-white border border-[#ff3b30]/20">
+            Private
           </span>
-        </div>
+        ) : (
+          <span className="text-[10px] px-2.5 py-0.5 rounded-full font-bold tracking-wide uppercase whitespace-nowrap leading-none shrink-0 text-[#34c759] bg-white border border-[#34c759]/20">
+            Public
+          </span>
+        )}
+        
+        {repo.language && (
+          <span className="flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full font-bold tracking-wide uppercase whitespace-nowrap leading-none shrink-0 text-[#4A4A4A] bg-white border border-[#d6d1c4]">
+            <Code2 className="w-3 h-3" />
+            {repo.language}
+          </span>
+        )}
+        
+        <span className="text-[10px] px-2.5 py-0.5 rounded-full font-bold tracking-wide uppercase whitespace-nowrap leading-none shrink-0 text-[#4A4A4A] bg-white border border-[#d6d1c4]">
+          {formatSize(repo.size)}
+        </span>
       </div>
 
       {/* Lower Section: Action Toolbar (White Background) */}
