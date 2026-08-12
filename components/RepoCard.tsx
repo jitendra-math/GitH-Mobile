@@ -58,9 +58,9 @@ export default function RepoCard({ repo }: { repo: any }) {
   const isPrivate = repo.private;
   const visibilityLabel = isPrivate ? "Private" : "Public";
   const visibilityIcon = isPrivate ? (
-    <Lock className="w-3 h-3" />
+    <Lock className="w-2.5 h-2.5" />
   ) : (
-    <Globe className="w-3 h-3" />
+    <Globe className="w-2.5 h-2.5" />
   );
   const visibilityColor = isPrivate
     ? "bg-amber-100 text-amber-800 border-amber-200"
@@ -72,32 +72,34 @@ export default function RepoCard({ repo }: { repo: any }) {
 
   return (
     <div className="flex flex-col bg-white rounded-xl border border-[#d6d1c4] hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06),_0_0_0_1px_rgba(0,0,0,0.02)] hover:border-[rgba(181,172,138,0.4)] transition-all duration-200 overflow-hidden">
-      {/* Upper Section: Repo Name + Badges (Light Ivory Background) */}
-      <div className="bg-[#F5F1EC] p-4 flex flex-wrap items-center justify-between gap-2">
-        <div className="text-[15px] font-semibold text-[#1A1A1A] leading-snug break-words flex-1 min-w-[120px]">
+      
+      {/* Upper Section: Repo Name + Badges Inline (Light Ivory Background) */}
+      <div className="bg-[#F5F1EC] p-3.5 flex flex-wrap items-center gap-2">
+        
+        {/* Repo Name */}
+        <div className="text-[15px] font-semibold text-[#1A1A1A] leading-snug break-words mr-1">
           {repo.name}
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Language Badge */}
-          {language && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-full bg-white/80 border border-[rgba(181,172,138,0.3)] shadow-sm">
-              <span
-                className="w-2.5 h-2.5 rounded-full"
-                style={{ backgroundColor: langColor || "#808080" }}
-              />
-              {language}
-            </span>
-          )}
-
-          {/* Visibility Badge */}
-          <span
-            className={`inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded-full border ${visibilityColor} shadow-sm`}
-          >
-            {visibilityIcon}
-            {visibilityLabel}
+        {/* Language Badge */}
+        {language && (
+          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-white/80 border border-[rgba(181,172,138,0.3)] shadow-sm">
+            <span
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: langColor || "#808080" }}
+            />
+            {language}
           </span>
-        </div>
+        )}
+
+        {/* Visibility Badge */}
+        <span
+          className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full border ${visibilityColor} shadow-sm`}
+        >
+          {visibilityIcon}
+          {visibilityLabel}
+        </span>
+
       </div>
 
       {/* Lower Section: Action Toolbar (White Background) */}
