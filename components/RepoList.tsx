@@ -13,7 +13,7 @@ export default async function RepoList() {
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       {repos.map((repo: any) => (
         <RepoCard key={repo.id} repo={repo} />
       ))}
