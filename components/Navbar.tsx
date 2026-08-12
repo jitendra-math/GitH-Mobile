@@ -26,7 +26,7 @@ export default function Navbar() {
         {/* Brand Logo & Name */}
         <div className="flex items-center gap-2.5">
           <img 
-            src="https://ti7s3ydfonirqgxf.public.blob.vercel-storage.com/misc/1772957241057-img_20260308_1326360-vebUvI4064WrC7BFNaeJg83xbGnt6D.png" 
+            src="/logo.png" 
             alt="Brand Logo" 
             className="w-6 h-6 object-cover rounded-sm"
           />
