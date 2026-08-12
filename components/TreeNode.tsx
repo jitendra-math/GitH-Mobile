@@ -57,7 +57,7 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
 
   return (
     <li className="list-none m-0 p-0">
-      <div className="flex items-center justify-between p-2 rounded-lg cursor-pointer hover:bg-black/5 transition-all mb-0.5 group flex-wrap md:flex-nowrap">
+      <div className="flex flex-col md:flex-row md:items-center justify-between p-2 rounded-lg cursor-pointer hover:bg-black/5 transition-all mb-0.5 group">
         
         {isFolder ? (
           <div className="flex items-center gap-2.5 flex-1 min-w-0" onClick={() => setIsOpen(!isOpen)}>
@@ -74,8 +74,9 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
           </div>
         )}
 
+        {/* Buttons wrapper: Mobile par wrap hoke neeche aayega, Desktop par line me rahega */}
         {!isFolder && (
-          <div className="flex items-center gap-1.5 md:opacity-0 md:-translate-x-2 md:group-hover:opacity-100 md:group-hover:translate-x-0 transition-all w-full md:w-auto mt-2 md:mt-0 pl-7 md:pl-0">
+          <div className="flex items-center gap-2 mt-2 md:mt-0 pl-[28px] md:pl-0 w-full md:w-auto md:opacity-0 md:-translate-x-2 md:group-hover:opacity-100 md:group-hover:translate-x-0 transition-all shrink-0">
             <button onClick={handleCopy} disabled={loading} className="flex-1 md:flex-none px-3 py-1.5 text-[12px] font-semibold text-white bg-[#6D001A] rounded-xl hover:-translate-y-px hover:shadow-sm transition-all disabled:opacity-50">
               {loading ? "..." : "Copy"}
             </button>

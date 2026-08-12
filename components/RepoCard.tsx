@@ -55,26 +55,26 @@ export default function RepoCard({ repo }: { repo: any }) {
 
   return (
     <div className="p-4 bg-white rounded-xl border border-[#d6d1c4] hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06),_0_0_0_1px_rgba(0,0,0,0.02)] hover:border-[rgba(181,172,138,0.4)] transition-all duration-200">
-      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+      <div className="flex items-start justify-between gap-4">
         
         {/* Left Side: Details */}
-        <div className="flex flex-col gap-2 min-w-0">
-          <div className="flex items-center gap-2.5">
-            <div className="text-[15px] font-semibold text-[#1A1A1A] truncate leading-none">
+        <div className="flex flex-col gap-2 flex-1">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="text-[15px] font-semibold text-[#1A1A1A] leading-tight break-words">
               {repo.name}
             </div>
             {repo.private ? (
-              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold tracking-wide uppercase whitespace-nowrap leading-none shrink-0 text-[#ff3b30] bg-[#ff3b30]/10 border border-[#ff3b30]/20">
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold tracking-wide uppercase whitespace-nowrap leading-none shrink-0 text-[#ff3b30] bg-[#ff3b30]/10 border border-[#ff3b30]/20 mt-0.5">
                 Private
               </span>
             ) : (
-              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold tracking-wide uppercase whitespace-nowrap leading-none shrink-0 text-[#34c759] bg-[#34c759]/10 border border-[#34c759]/20">
+              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold tracking-wide uppercase whitespace-nowrap leading-none shrink-0 text-[#34c759] bg-[#34c759]/10 border border-[#34c759]/20 mt-0.5">
                 Public
               </span>
             )}
           </div>
           
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 mt-0.5">
             {repo.language && (
               <span className={`flex items-center gap-1 text-[11px] px-[10px] py-[3.5px] rounded-full font-semibold whitespace-nowrap leading-none shrink-0 ${langStyle}`}>
                 <Code2 className="w-3 h-3" />
@@ -88,8 +88,7 @@ export default function RepoCard({ repo }: { repo: any }) {
         </div>
 
         {/* Right Side: Action Buttons */}
-        <div className="flex items-center gap-2 shrink-0 justify-end">
-          
+        <div className="flex items-center gap-2 shrink-0">
           <button 
             onClick={() => openModal(repo.owner.login, repo.name, repo.default_branch || "main")}
             className="w-10 h-10 flex items-center justify-center p-0 rounded-full bg-black/5 text-[#4A4A4A] border-none cursor-pointer transition-all duration-150 hover:bg-[#B5AC8A]/20 hover:text-[#B5AC8A] hover:scale-[1.08]"
