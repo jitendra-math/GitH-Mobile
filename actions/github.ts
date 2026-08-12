@@ -106,6 +106,14 @@ export async function getFileContent(owner: string, repo: string, path: string, 
   return res.json(); 
 }
 
+export async function fetchCommitHistory(owner: string, repo: string, branch: string = "main") {
+  const token = cookies().get("github_pat")?.value;
+  if (!token) throw new Error("No token");
+  const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits?sha=${branch}&per_page=15`, { headers: getHeaders(token) });
+  if (!res.ok) throw new Error("Failed to fetch history");
+  return res.json();
+}
+
 // Internal helper functions for Multi-file Commit
 async function createBlob(token: string, owner: string, repo: string, content: string) {
   const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/blobs`, {
@@ -124,28 +132,24 @@ export async function commitMultipleFiles(owner: string, repo: string, branch: s
   if (!token) throw new Error("No token");
 
   try {
-    // 1. Get latest commit SHA
     let res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/ref/heads/${branch}`, { headers: getHeaders(token) });
     if (!res.ok) throw new Error("Failed to get branch ref");
     const refData = await res.json();
     const latestCommitSha = refData.object.sha;
 
-    // 2. Get base tree SHA
     res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits/${latestCommitSha}`, { headers: getHeaders(token) });
     const commitData = await res.json();
     const baseTreeSha = commitData.tree.sha;
 
-    // 3. Create Blobs & Tree Items
     const treeItems = await Promise.all(files.map(async (file) => {
       if (file.isDelete) {
-        return { path: file.path, mode: "100644", type: "blob", sha: null }; // null sha deletes the file
+        return { path: file.path, mode: "100644", type: "blob", sha: null };
       } else {
         const blobSha = await createBlob(token, owner, repo, file.contentBase64);
         return { path: file.path, mode: "100644", type: "blob", sha: blobSha };
       }
     }));
 
-    // 4. Create New Tree
     res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees`, {
       method: "POST",
       headers: getHeaders(token),
@@ -154,7 +158,6 @@ export async function commitMultipleFiles(owner: string, repo: string, branch: s
     if (!res.ok) throw new Error("Failed to create tree");
     const newTreeData = await res.json();
 
-    // 5. Create Commit
     const message = files.some(f => f.isDelete) ? "Updates & Deletions via Repo Manager 🚀" : "Update via Repo Manager 🚀";
     res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits`, {
       method: "POST",
@@ -164,7 +167,6 @@ export async function commitMultipleFiles(owner: string, repo: string, branch: s
     if (!res.ok) throw new Error("Failed to create commit");
     const newCommitData = await res.json();
 
-    // 6. Update Branch Ref
     res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${branch}`, {
       method: "PATCH",
       headers: getHeaders(token),
@@ -176,5 +178,53 @@ export async function commitMultipleFiles(owner: string, repo: string, branch: s
     return { success: true };
   } catch (error: any) {
     return { error: error.message || "Commit failed" };
+  }
+}
+
+export async function rollbackToCommit(owner: string, repo: string, branch: string, targetCommitSha: string) {
+  const token = cookies().get("github_pat")?.value;
+  if (!token) throw new Error("No token");
+
+  try {
+    // 1. Get latest branch SHA to use as parent
+    let res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/ref/heads/${branch}`, { headers: getHeaders(token) });
+    if (!res.ok) throw new Error("Failed to get branch ref");
+    const refData = await res.json();
+    const latestBranchCommitSha = refData.object.sha;
+
+    // 2. Get target commit details to extract its tree SHA
+    res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits/${targetCommitSha}`, { headers: getHeaders(token) });
+    if (!res.ok) throw new Error("Failed to get target commit");
+    const targetCommitObj = await res.json();
+    const oldTreeSha = targetCommitObj.tree.sha;
+
+    // 3. Create a new commit using the old tree
+    const shortSha = targetCommitSha.substring(0, 7);
+    const commitMessage = `Rollback to commit ${shortSha} via Repo Manager ⏪`;
+    
+    res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/commits`, {
+      method: "POST",
+      headers: getHeaders(token),
+      body: JSON.stringify({
+        message: commitMessage,
+        tree: oldTreeSha,
+        parents: [latestBranchCommitSha]
+      }),
+    });
+    if (!res.ok) throw new Error("Failed to create rollback commit");
+    const newCommitData = await res.json();
+
+    // 4. Update the branch reference to point to this new commit
+    res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/refs/heads/${branch}`, {
+      method: "PATCH",
+      headers: getHeaders(token),
+      body: JSON.stringify({ sha: newCommitData.sha }),
+    });
+    if (!res.ok) throw new Error("Failed to update branch ref");
+
+    revalidatePath("/dashboard");
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message || "Rollback failed" };
   }
 }
