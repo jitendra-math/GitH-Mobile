@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Download, Trash2, Code2 } from "lucide-react";
+import { Download, Trash2, Code2, Pencil } from "lucide-react";
 import { deleteRepo } from "@/actions/github";
+import { useEditStore } from "@/store/useEditStore";
 
 export default function RepoCard({ repo }: { repo: any }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const openModal = useEditStore((state) => state.openModal);
 
   const formatSize = (kb: number) => {
     if (!kb || kb === 0) return '0 KB';
@@ -37,7 +39,6 @@ export default function RepoCard({ repo }: { repo: any }) {
     window.open(`${repo.html_url}/archive/refs/heads/${defaultBranch}.zip`);
   };
 
-  // Stack/Language ke hisaab se premium pastel colors
   const languageColors: Record<string, string> = {
     TypeScript: "text-blue-600 bg-blue-50 border border-blue-100",
     JavaScript: "text-amber-600 bg-amber-50 border border-amber-100",
@@ -58,8 +59,6 @@ export default function RepoCard({ repo }: { repo: any }) {
         
         {/* Left Side: Details */}
         <div className="flex flex-col gap-2 min-w-0">
-          
-          {/* Header: Name + Visibility Badge */}
           <div className="flex items-center gap-2.5">
             <div className="text-[15px] font-semibold text-[#1A1A1A] truncate leading-none">
               {repo.name}
@@ -75,7 +74,6 @@ export default function RepoCard({ repo }: { repo: any }) {
             )}
           </div>
           
-          {/* Bottom: Stack & Size */}
           <div className="flex flex-wrap items-center gap-2">
             {repo.language && (
               <span className={`flex items-center gap-1 text-[11px] px-[10px] py-[3.5px] rounded-full font-semibold whitespace-nowrap leading-none shrink-0 ${langStyle}`}>
@@ -83,15 +81,23 @@ export default function RepoCard({ repo }: { repo: any }) {
                 {repo.language}
               </span>
             )}
-            
             <span className="text-[11px] px-[10px] py-[3.5px] rounded-full font-semibold whitespace-nowrap leading-none shrink-0 text-[#4A4A4A] bg-black/5 border border-transparent">
               {formatSize(repo.size)}
             </span>
           </div>
         </div>
 
-        {/* Right Side: Action Buttons (Fully Rounded) */}
+        {/* Right Side: Action Buttons */}
         <div className="flex items-center gap-2 shrink-0 justify-end">
+          
+          <button 
+            onClick={() => openModal(repo.owner.login, repo.name, repo.default_branch || "main")}
+            className="w-10 h-10 flex items-center justify-center p-0 rounded-full bg-black/5 text-[#4A4A4A] border-none cursor-pointer transition-all duration-150 hover:bg-[#B5AC8A]/20 hover:text-[#B5AC8A] hover:scale-[1.08]"
+            title="Edit Repository"
+          >
+            <Pencil className="w-[18px] h-[18px] stroke-[2.5]" />
+          </button>
+
           <button 
             onClick={handleDownload}
             className="w-10 h-10 flex items-center justify-center p-0 rounded-full bg-black/5 text-[#4A4A4A] border-none cursor-pointer transition-all duration-150 hover:bg-[#6D001A]/10 hover:text-[#6D001A] hover:scale-[1.08]"
