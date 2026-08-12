@@ -6,7 +6,7 @@ import { Download, Trash2, Pencil, Globe, Lock } from "lucide-react";
 import { deleteRepo } from "@/actions/github";
 import { useEditStore } from "@/store/useEditStore";
 
-// Language colors (common ones) – fallback grey
+// Common language colors (fallback #808080 for unknown)
 const languageColors: Record<string, string> = {
   JavaScript: "#f1e05a",
   TypeScript: "#3178c6",
@@ -17,23 +17,18 @@ const languageColors: Record<string, string> = {
   C: "#555555",
   "C++": "#f34b7d",
   "C#": "#178600",
-  PHP: "#4F5D95",
   Ruby: "#701516",
-  Swift: "#ffac45",
+  PHP: "#4F5D95",
+  Swift: "#F05138",
   Kotlin: "#A97BFF",
   Dart: "#00B4AB",
   HTML: "#e34c26",
   CSS: "#563d7c",
   Shell: "#89e051",
   Vue: "#41b883",
-  React: "#61dafb", // not official but fine
+  React: "#61dafb", // not official but common
+  default: "#808080",
 };
-
-// Get a readable color for the language dot
-function getLanguageColor(lang: string | null): string {
-  if (!lang) return "#8a8a8a";
-  return languageColors[lang] || "#8a8a8a";
-}
 
 export default function RepoCard({ repo }: { repo: any }) {
   const router = useRouter();
@@ -42,6 +37,7 @@ export default function RepoCard({ repo }: { repo: any }) {
 
   const handleDelete = async () => {
     if (!confirm(`Are you sure you want to delete ${repo.name}?`)) return;
+
     setLoading(true);
     try {
       await deleteRepo(repo.owner.login, repo.name);
@@ -58,87 +54,77 @@ export default function RepoCard({ repo }: { repo: any }) {
     window.open(`${repo.html_url}/archive/refs/heads/${defaultBranch}.zip`);
   };
 
+  // Visibility badge
   const isPrivate = repo.private;
+  const visibilityLabel = isPrivate ? "Private" : "Public";
+  const visibilityIcon = isPrivate ? (
+    <Lock className="w-3 h-3" />
+  ) : (
+    <Globe className="w-3 h-3" />
+  );
+  const visibilityColor = isPrivate
+    ? "bg-amber-100 text-amber-800 border-amber-200"
+    : "bg-emerald-100 text-emerald-800 border-emerald-200";
+
+  // Language badge
   const language = repo.language || null;
-  const description = repo.description || null;
+  const langColor = language ? languageColors[language] || languageColors.default : null;
 
   return (
-    <div className="group bg-white rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-lg hover:border-gray-300/70 transition-all duration-300 overflow-hidden">
-      
-      {/* Main content */}
-      <div className="p-4 pb-2">
-        {/* Row: Name + Badges */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-base font-semibold text-gray-900 truncate">
-              {repo.name}
-            </h3>
-          </div>
-
-          {/* Badges */}
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            {/* Visibility badge */}
-            <span
-              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                isPrivate
-                  ? "bg-amber-100 text-amber-700"
-                  : "bg-emerald-100 text-emerald-700"
-              }`}
-            >
-              {isPrivate ? (
-                <Lock className="w-3 h-3" />
-              ) : (
-                <Globe className="w-3 h-3" />
-              )}
-              {isPrivate ? "Private" : "Public"}
-            </span>
-
-            {/* Language badge (if exists) */}
-            {language && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-gray-100 text-gray-700 text-xs font-medium">
-                <span
-                  className="w-2.5 h-2.5 rounded-full"
-                  style={{ backgroundColor: getLanguageColor(language) }}
-                />
-                {language}
-              </span>
-            )}
-          </div>
+    <div className="flex flex-col bg-white rounded-xl border border-[#d6d1c4] hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06),_0_0_0_1px_rgba(0,0,0,0.02)] hover:border-[rgba(181,172,138,0.4)] transition-all duration-200 overflow-hidden">
+      {/* Upper Section: Repo Name + Badges (Light Ivory Background) */}
+      <div className="bg-[#F5F1EC] p-4 flex flex-wrap items-center justify-between gap-2">
+        <div className="text-[15px] font-semibold text-[#1A1A1A] leading-snug break-words flex-1 min-w-[120px]">
+          {repo.name}
         </div>
 
-        {/* Description (if any) */}
-        {description && (
-          <p className="mt-1.5 text-sm text-gray-500 line-clamp-2">
-            {description}
-          </p>
-        )}
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Language Badge */}
+          {language && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-full bg-white/80 border border-[rgba(181,172,138,0.3)] shadow-sm">
+              <span
+                className="w-2.5 h-2.5 rounded-full"
+                style={{ backgroundColor: langColor || "#808080" }}
+              />
+              {language}
+            </span>
+          )}
+
+          {/* Visibility Badge */}
+          <span
+            className={`inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded-full border ${visibilityColor} shadow-sm`}
+          >
+            {visibilityIcon}
+            {visibilityLabel}
+          </span>
+        </div>
       </div>
 
-      {/* Action toolbar */}
-      <div className="flex items-center justify-end gap-1 px-4 py-2 border-t border-gray-100 bg-gray-50/50">
+      {/* Lower Section: Action Toolbar (White Background) */}
+      <div className="bg-white p-2 px-3.5 flex items-center justify-end gap-2.5 border-t border-[rgba(181,172,138,0.25)]">
         <button
           onClick={() => openModal(repo.owner.login, repo.name, repo.default_branch || "main")}
-          className="p-2 rounded-full text-gray-500 hover:text-[#B5AC8A] hover:bg-[#B5AC8A]/10 transition-all duration-200"
+          className="w-8 h-8 flex items-center justify-center p-0 rounded-full bg-[#B5AC8A]/15 text-[#B5AC8A] border-none cursor-pointer transition-all duration-150 hover:bg-[#B5AC8A] hover:text-white hover:scale-[1.08]"
           title="Edit Repository"
         >
-          <Pencil className="w-4 h-4" />
+          <Pencil className="w-4 h-4 stroke-[2.5]" />
         </button>
 
         <button
           onClick={handleDownload}
-          className="p-2 rounded-full text-gray-500 hover:text-[#6D001A] hover:bg-[#6D001A]/10 transition-all duration-200"
+          className="w-8 h-8 flex items-center justify-center p-0 rounded-full bg-[#6D001A]/10 text-[#6D001A] border-none cursor-pointer transition-all duration-150 hover:bg-[#6D001A] hover:text-white hover:scale-[1.08]"
           title="Download ZIP"
         >
-          <Download className="w-4 h-4" />
+          <Download className="w-4 h-4 stroke-[2.5]" />
         </button>
 
         <button
           onClick={handleDelete}
           disabled={loading}
-          className="p-2 rounded-full text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-8 h-8 flex items-center justify-center p-0 rounded-full bg-[#ff3b30]/10 text-[#ff3b30] border-none cursor-pointer transition-all duration-150 hover:bg-[#ff3b30] hover:text-white hover:scale-[1.08] disabled:opacity-50 disabled:cursor-not-allowed"
           title="Delete Repository"
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash2 className="w-4 h-4 stroke-[2.5]" />
         </button>
       </div>
     </div>
