@@ -19,15 +19,52 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
   // Check if current file is in the commit queue
   const queuedItem = !isFolder ? queue.find(q => q.path === info.path) : null;
 
+  // --- SMART BUTTON MATRIX LOGIC ---
+  const sizeKB = (info.size || 0) / 1024;
+  const isLarge = sizeKB > 100; // Scenario 2 check (> 100 KB)
+  const isBinary = Boolean(
+    info.path?.match(/\.(png|jpe?g|gif|ico|webp|mp4|mp3|ttf|woff2?|eot|pdf|zip|tar|gz|rar|7z)$/i)
+  ); // Scenario 3 check (Media/Binary)
+
   const handleCopy = async () => {
     setLoading(true);
     try {
       const data = await getFileContent(owner, repo, info.path, branch);
       const decoded = decodeBase64(data.content);
       await navigator.clipboard.writeText(decoded);
-      // Alert hata diya gaya hai jaisa tumne kaha tha
     } catch (err: any) {
       alert("Copy failed: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    setLoading(true);
+    try {
+      const data = await getFileContent(owner, repo, info.path, branch);
+      
+      // Convert Base64 to Blob inside the browser
+      const cleanBase64 = data.content.replace(/\s/g, ''); 
+      const byteCharacters = atob(cleanBase64);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray]);
+      
+      // Create a temporary link and trigger download
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = nodeName; // Suggested filename
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url); // Clean up memory
+    } catch (err: any) {
+      alert("Download failed: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -84,7 +121,7 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
                 {nodeName}
               </span>
               <span className="text-[11px] text-[#8a8a8a] font-mono opacity-75">
-                {formatSize((info.size || 0) / 1024)}
+                {formatSize(sizeKB)}
                 
                 {/* Size Difference Logic */}
                 {queuedItem && queuedItem.sizeDiff !== undefined && queuedItem.sizeDiff !== 0 && (
@@ -100,15 +137,30 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
         {/* Buttons wrapper: Mobile par wrap hoke neeche aayega, Desktop par line me rahega */}
         {!isFolder && (
           <div className="flex items-center gap-2 mt-2 md:mt-0 pl-[28px] md:pl-0 w-full md:w-auto md:opacity-0 md:-translate-x-2 md:group-hover:opacity-100 md:group-hover:translate-x-0 transition-all shrink-0">
-            <button onClick={handleCopy} disabled={loading} className="flex-1 md:flex-none px-3 py-1.5 text-[12px] font-semibold text-white bg-[#6D001A] rounded-xl hover:-translate-y-px hover:shadow-sm transition-all disabled:opacity-50">
-              {loading ? "..." : "Copy"}
-            </button>
-            <button onClick={handleReplace} className="flex-1 md:flex-none px-3 py-1.5 text-[12px] font-semibold text-white bg-[#B5AC8A] rounded-xl hover:-translate-y-px hover:shadow-sm transition-all">
-              Replace
-            </button>
+            
+            {/* COPY or DOWNLOAD BUTTON */}
+            {isBinary || isLarge ? (
+              <button onClick={handleDownload} disabled={loading} className="flex-1 md:flex-none px-3 py-1.5 text-[12px] font-semibold text-white bg-[#6D001A] rounded-xl hover:-translate-y-px hover:shadow-sm transition-all disabled:opacity-50">
+                {loading ? "..." : "Download"}
+              </button>
+            ) : (
+              <button onClick={handleCopy} disabled={loading} className="flex-1 md:flex-none px-3 py-1.5 text-[12px] font-semibold text-white bg-[#6D001A] rounded-xl hover:-translate-y-px hover:shadow-sm transition-all disabled:opacity-50">
+                {loading ? "..." : "Copy"}
+              </button>
+            )}
+
+            {/* REPLACE BUTTON (Hidden for Binary Files) */}
+            {!isBinary && (
+              <button onClick={handleReplace} className="flex-1 md:flex-none px-3 py-1.5 text-[12px] font-semibold text-white bg-[#B5AC8A] rounded-xl hover:-translate-y-px hover:shadow-sm transition-all">
+                Replace
+              </button>
+            )}
+
+            {/* DELETE BUTTON (Always Visible) */}
             <button onClick={handleDelete} className="flex-1 md:flex-none px-3 py-1.5 text-[12px] font-semibold text-white bg-gradient-to-br from-[#ff3b30] to-[#ff453a] rounded-xl hover:-translate-y-px hover:shadow-sm transition-all">
               Delete
             </button>
+
           </div>
         )}
       </div>
