@@ -1,6 +1,18 @@
 import TokenForm from "@/components/TokenForm";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export default function LoginPage() {
+  // 1. Cookie check karo
+  const cookieStore = cookies();
+  const token = cookieStore.get("github_pat");
+
+  // 2. Agar token hai, toh bina login form dikhaye seedha dashboard par bhej do
+  if (token) {
+    redirect("/dashboard");
+  }
+
+  // 3. Agar token nahi hai, tabhi yeh form render hoga
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-xl shadow-md p-6 border border-gray-100">
