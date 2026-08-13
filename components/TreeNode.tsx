@@ -10,13 +10,12 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   
-  // Yahan queue ko bhi store se nikal liya hai
-  const { owner, repo, branch, addToQueue, queue } = useEditStore();
+  // Yahan queue aur edit states ko nikal liya hai
+  const { owner, repo, branch, addToQueue, queue, isEditMode, setEditingFile } = useEditStore();
 
   const isFolder = nodeData._info.type === "tree";
   const info = nodeData._info;
 
-  // Check if current file is in the commit queue
   const queuedItem = !isFolder ? queue.find(q => q.path === info.path) : null;
 
   // --- SMART BUTTON MATRIX LOGIC ---
@@ -43,8 +42,6 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
     setLoading(true);
     try {
       const data = await getFileContent(owner, repo, info.path, branch);
-      
-      // Convert Base64 to Blob inside the browser
       const cleanBase64 = data.content.replace(/\s/g, ''); 
       const byteCharacters = atob(cleanBase64);
       const byteNumbers = new Array(byteCharacters.length);
@@ -54,15 +51,14 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
       const byteArray = new Uint8Array(byteNumbers);
       const blob = new Blob([byteArray]);
       
-      // Create a temporary link and trigger download
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = nodeName; // Suggested filename
+      a.download = nodeName; 
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url); // Clean up memory
+      URL.revokeObjectURL(url); 
     } catch (err: any) {
       alert("Download failed: " + err.message);
     } finally {
@@ -76,7 +72,6 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
       if (!text) return alert("Clipboard is empty!");
       if (!confirm(`Replace "${info.path}" with clipboard content?`)) return;
 
-      // Calculate size difference
       const oldSize = info.size || 0;
       const newSize = new Blob([text]).size;
       const sizeDiff = newSize - oldSize;
@@ -88,10 +83,28 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
     }
   };
 
+  const handleEdit = async () => {
+    setLoading(true);
+    try {
+      const data = await getFileContent(owner, repo, info.path, branch);
+      const decoded = decodeBase64(data.content);
+      
+      // Store mein file bhej do taaki modal open ho jaye
+      setEditingFile({ 
+        path: info.path, 
+        sha: info.sha, 
+        content: decoded, 
+        oldSize: info.size || 0 
+      });
+    } catch (err: any) {
+      alert("Edit failed: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDelete = () => {
     if (!confirm(`Delete "${info.path}"? It will be added to the queue.`)) return;
-    
-    // For delete, the difference is entirely the negative old size
     const oldSize = info.size || 0;
     addToQueue({ path: info.path, sha: info.sha, isDelete: true, sizeDiff: -oldSize });
   };
@@ -122,8 +135,6 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
               </span>
               <span className="text-[11px] text-[#8a8a8a] font-mono opacity-75">
                 {formatSize(sizeKB)}
-                
-                {/* Size Difference Logic */}
                 {queuedItem && queuedItem.sizeDiff !== undefined && queuedItem.sizeDiff !== 0 && (
                   <span className={`ml-1.5 font-bold ${queuedItem.sizeDiff > 0 ? "text-[#34c759]" : "text-[#ff3b30]"}`}>
                     {queuedItem.sizeDiff > 0 ? "+" : ""}{(queuedItem.sizeDiff / 1024).toFixed(2)} KB
@@ -134,11 +145,11 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
           </div>
         )}
 
-        {/* Buttons wrapper: Mobile par wrap hoke neeche aayega, Desktop par line me rahega */}
+        {/* Buttons */}
         {!isFolder && (
           <div className="flex items-center gap-2 mt-2 md:mt-0 pl-[28px] md:pl-0 w-full md:w-auto md:opacity-0 md:-translate-x-2 md:group-hover:opacity-100 md:group-hover:translate-x-0 transition-all shrink-0">
             
-            {/* COPY or DOWNLOAD BUTTON */}
+            {/* COPY / DOWNLOAD */}
             {isBinary || isLarge ? (
               <button onClick={handleDownload} disabled={loading} className="flex-1 md:flex-none px-3 py-1.5 text-[12px] font-semibold text-white bg-[#6D001A] rounded-xl hover:-translate-y-px hover:shadow-sm transition-all disabled:opacity-50">
                 {loading ? "..." : "Download"}
@@ -149,18 +160,23 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
               </button>
             )}
 
-            {/* REPLACE BUTTON (Hidden for Binary Files) */}
+            {/* EDIT / REPLACE SWITCH */}
             {!isBinary && (
-              <button onClick={handleReplace} className="flex-1 md:flex-none px-3 py-1.5 text-[12px] font-semibold text-white bg-[#B5AC8A] rounded-xl hover:-translate-y-px hover:shadow-sm transition-all">
-                Replace
-              </button>
+              isEditMode ? (
+                <button onClick={handleEdit} disabled={loading} className="flex-1 md:flex-none px-3 py-1.5 text-[12px] font-semibold text-white bg-[#34c759] rounded-xl hover:-translate-y-px hover:shadow-sm transition-all disabled:opacity-50">
+                  {loading ? "..." : "Edit"}
+                </button>
+              ) : (
+                <button onClick={handleReplace} disabled={loading} className="flex-1 md:flex-none px-3 py-1.5 text-[12px] font-semibold text-white bg-[#B5AC8A] rounded-xl hover:-translate-y-px hover:shadow-sm transition-all disabled:opacity-50">
+                  Replace
+                </button>
+              )
             )}
 
-            {/* DELETE BUTTON (Always Visible) */}
-            <button onClick={handleDelete} className="flex-1 md:flex-none px-3 py-1.5 text-[12px] font-semibold text-white bg-gradient-to-br from-[#ff3b30] to-[#ff453a] rounded-xl hover:-translate-y-px hover:shadow-sm transition-all">
+            {/* DELETE */}
+            <button onClick={handleDelete} disabled={loading} className="flex-1 md:flex-none px-3 py-1.5 text-[12px] font-semibold text-white bg-gradient-to-br from-[#ff3b30] to-[#ff453a] rounded-xl hover:-translate-y-px hover:shadow-sm transition-all disabled:opacity-50">
               Delete
             </button>
-
           </div>
         )}
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { X, Copy, CopyCheck, History, ArrowLeft, UploadCloud } from "lucide-react";
+import { X, Copy, CopyCheck, History, ArrowLeft, UploadCloud, Pencil } from "lucide-react";
 import { useEditStore } from "@/store/useEditStore";
 import { getRepoTree, commitMultipleFiles, fetchCommitHistory, rollbackToCommit } from "@/actions/github";
 import { generateTreeText } from "@/lib/utils";
@@ -10,9 +10,13 @@ import BulkActionModal from "./BulkActionModal";
 import AlertModal from "./AlertModal";
 import RollbackPromptModal from "./RollbackPromptModal";
 import FileUploadModal from "./FileUploadModal";
+import CodeEditorModal from "./CodeEditorModal";
 
 export default function EditModal() {
-  const { isOpen, owner, repo, branch, queue, closeModal, removeFromQueue, clearQueue } = useEditStore();
+  const { 
+    isOpen, owner, repo, branch, queue, closeModal, removeFromQueue, clearQueue,
+    isEditMode, toggleEditMode 
+  } = useEditStore();
   
   // Data States
   const [treeData, setTreeData] = useState<any>(null);
@@ -171,7 +175,18 @@ export default function EditModal() {
 
               <div className="w-px h-4 bg-[#d6d1c4] mx-0.5 shrink-0"></div>
 
-              {/* NEW UPLOAD BUTTON */}
+              {/* NEW EDIT MODE TOGGLE BUTTON */}
+              {view === "tree" && (
+                <button 
+                  onClick={toggleEditMode} 
+                  className={`h-8 px-3 flex items-center gap-1.5 rounded-lg transition-colors text-[12px] font-semibold shadow-sm shrink-0 ${isEditMode ? 'bg-[#1A1A1A] text-white' : 'bg-white border border-[#d6d1c4] text-[#4A4A4A] hover:bg-[#e6e0d4]'}`}
+                  title="Toggle Edit Mode"
+                >
+                  <Pencil className="w-3.5 h-3.5" />
+                  <span>Edit Mode {isEditMode ? "ON" : "OFF"}</span>
+                </button>
+              )}
+
               <button onClick={() => setIsFileUploadModalOpen(true)} className="h-8 px-3 flex items-center gap-1.5 rounded-lg bg-white border border-[#d6d1c4] text-[#4A4A4A] hover:bg-[#e6e0d4] transition-colors text-[12px] font-semibold shadow-sm shrink-0">
                 <UploadCloud className="w-3.5 h-3.5" />
                 <span>Upload</span>
@@ -280,6 +295,7 @@ export default function EditModal() {
       </div>
 
       {/* External Modals */}
+      <CodeEditorModal />
       <FileUploadModal 
         isOpen={isFileUploadModalOpen} 
         onClose={() => setIsFileUploadModalOpen(false)} 
