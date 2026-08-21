@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { X, Save, FileCode2, Pencil } from "lucide-react";
 import CodeMirror from '@uiw/react-codemirror';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
+import { loadLanguage } from '@uiw/codemirror-extensions-langs';
 import { useEditStore } from "@/store/useEditStore";
 import { encodeBase64 } from "@/lib/utils";
 import RenameFileModal from "./RenameFileModal";
@@ -19,9 +20,45 @@ export default function CodeEditorModal() {
   useEffect(() => {
     if (editingFile) {
       setText(editingFile.content);
-      setCurrentPath(editingFile.path); // Default path set from store
+      setCurrentPath(editingFile.path); 
     }
   }, [editingFile]);
+
+  // SMART LANGUAGE DETECTOR 
+  const languageExtension = useMemo(() => {
+    if (!currentPath) return [];
+    
+    // File ki aakhiri extension nikalo
+    const ext = currentPath.split('.').pop()?.toLowerCase();
+    
+    // Extension ko CodeMirror ki language name se map karo
+    const extMap: Record<string, any> = {
+      js: 'javascript', jsx: 'javascript', ts: 'typescript', tsx: 'typescript',
+      py: 'python',
+      html: 'html', htm: 'html',
+      css: 'css',
+      json: 'json',
+      md: 'markdown',
+      java: 'java',
+      c: 'c', cpp: 'cpp', cs: 'csharp',
+      go: 'go',
+      rs: 'rust',
+      php: 'php',
+      kt: 'kotlin',
+      sql: 'sql',
+      sh: 'shell', bash: 'shell',
+      yaml: 'yaml', yml: 'yaml',
+      xml: 'xml'
+    };
+
+    const langName = ext ? extMap[ext] : null;
+    
+    if (langName) {
+      const loadedLang = loadLanguage(langName);
+      return loadedLang ? [loadedLang] : [];
+    }
+    return [];
+  }, [currentPath]);
 
   if (!editingFile) return null;
 
@@ -44,7 +81,7 @@ export default function CodeEditorModal() {
         // 2. Nayi file as a new blob queue mein daalo
         addToQueue({
           path: currentPath,
-          sha: null, // New file
+          sha: null, 
           contentBase64,
           isDelete: false,
           sizeDiff: newSize,
@@ -60,7 +97,7 @@ export default function CodeEditorModal() {
         });
       }
 
-      setEditingFile(null); // Close main modal
+      setEditingFile(null); 
     } catch (err: any) {
       alert("Failed to save: " + err.message);
     } finally {
@@ -104,6 +141,7 @@ export default function CodeEditorModal() {
             <CodeMirror
               value={text}
               theme={vscodeDark}
+              extensions={languageExtension}
               onChange={(val) => setText(val)}
               editable={!isSaving}
               height="100%"

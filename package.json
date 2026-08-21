@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
+    "@uiw/codemirror-extensions-langs": "^4.23.0",
     "@uiw/codemirror-theme-vscode": "^4.23.0",
     "@uiw/react-codemirror": "^4.23.0",
     "lucide-react": "^0.344.0",
