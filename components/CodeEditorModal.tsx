@@ -31,7 +31,6 @@ export default function CodeEditorModal() {
     const ext = currentPath.split('.').pop()?.toLowerCase();
     
     switch (ext) {
-      // 🚀 FIX: Grouped all JS/TS variants into a single robust parser
       case 'js': 
       case 'jsx': 
       case 'ts': 
@@ -102,20 +101,24 @@ export default function CodeEditorModal() {
     }
   };
 
+  // Header mein sirf file ka naam dikhane ke liye (e.g. "main.py" instead of "src/app/main.py")
+  const fileName = currentPath.split('/').pop() || currentPath;
+
   return (
     <>
       <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 bg-[#1A1A1A]/50 backdrop-blur-sm animate-in fade-in duration-200">
-        <div className="bg-[#1e1e1e] rounded-xl sm:rounded-2xl w-full max-w-5xl shadow-2xl border border-[#d6d1c4] overflow-hidden flex flex-col h-full max-h-[95vh] sm:max-h-[90vh] animate-in zoom-in-95 duration-200">
+        <div className="bg-[#F5F1EC] rounded-xl sm:rounded-2xl w-full max-w-5xl shadow-2xl border border-[#d6d1c4] overflow-hidden flex flex-col h-full max-h-[95vh] sm:max-h-[90vh] animate-in zoom-in-95 duration-200">
           
-          <div className="flex items-center justify-between p-3 sm:p-4 border-b border-[#333333] bg-[#252526]">
+          {/* Header (Light Theme) */}
+          <div className="flex items-center justify-between p-3 sm:p-4 border-b border-[rgba(181,172,138,0.25)] bg-white">
             <div className="flex items-center gap-2.5 overflow-hidden pr-4 group cursor-pointer" onClick={() => setIsRenameModalOpen(true)}>
-              <div className="w-8 h-8 flex shrink-0 items-center justify-center rounded-full bg-white/10 text-[#d4d4d4]">
+              <div className="w-8 h-8 flex shrink-0 items-center justify-center rounded-full bg-[#6D001A]/10 text-[#6D001A]">
                 <FileCode2 className="w-4 h-4" />
               </div>
-              <h3 className="text-[14px] font-semibold text-[#d4d4d4] truncate font-mono flex items-center gap-2">
-                {currentPath}
+              <h3 className="text-[14px] font-semibold text-[#1A1A1A] truncate font-mono flex items-center gap-2">
+                {fileName}
                 <button 
-                  className="p-1.5 rounded-md hover:bg-white/10 text-[#8a8a8a] hover:text-white transition-all"
+                  className="p-1.5 rounded-md hover:bg-[#F5F1EC] text-[#8a8a8a] hover:text-[#1A1A1A] transition-all"
                   title="Rename File"
                 >
                   <Pencil className="w-3.5 h-3.5" />
@@ -132,6 +135,7 @@ export default function CodeEditorModal() {
             </button>
           </div>
 
+          {/* Editor Area (Dark Theme for code) */}
           <div className="flex-1 overflow-auto bg-[#1e1e1e]">
             <CodeMirror
               value={text}
@@ -144,17 +148,18 @@ export default function CodeEditorModal() {
             />
           </div>
 
-          <div className="flex items-center justify-between p-3 sm:p-4 border-t border-[#333333] bg-[#252526]">
+          {/* Footer (Light Theme) */}
+          <div className="flex items-center justify-between p-3 sm:p-4 border-t border-[rgba(181,172,138,0.25)] bg-white">
             <span className="text-[11px] text-[#8a8a8a] hidden sm:inline-block font-mono">
               Size: {(new Blob([text]).size / 1024).toFixed(2)} KB
-              {currentPath !== editingFile.path && <span className="ml-2 text-amber-500 font-bold">(Will be Renamed)</span>}
+              {currentPath !== editingFile.path && <span className="ml-2 text-amber-600 font-bold">(Will be Renamed)</span>}
             </span>
             
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <button
                 onClick={() => setEditingFile(null)}
                 disabled={isSaving}
-                className="flex-1 sm:flex-none py-2 px-4 text-[13px] font-semibold text-[#d4d4d4] bg-white/5 rounded-xl hover:bg-white/10 transition-all disabled:opacity-50"
+                className="flex-1 sm:flex-none py-2 px-4 text-[13px] font-semibold text-[#4A4A4A] bg-[#F5F1EC] rounded-xl hover:bg-[#e6e0d4] transition-all disabled:opacity-50"
               >
                 Cancel
               </button>
