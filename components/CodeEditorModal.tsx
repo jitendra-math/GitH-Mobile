@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { X, Save, FileCode2, Pencil } from "lucide-react";
 import CodeMirror from '@uiw/react-codemirror';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
-import { langs } from '@uiw/codemirror-extensions-langs'; // <-- Improved import
+import { langs } from '@uiw/codemirror-extensions-langs'; 
 import { useEditStore } from "@/store/useEditStore";
 import { encodeBase64 } from "@/lib/utils";
 import RenameFileModal from "./RenameFileModal";
@@ -24,18 +24,20 @@ export default function CodeEditorModal() {
     }
   }, [editingFile]);
 
-  // 🔥 SMART LANGUAGE DETECTOR (100% WORKING FIXED) 🔥
+  // SMART LANGUAGE DETECTOR 
   const languageExtension = useMemo(() => {
     if (!currentPath) return [];
     
     const ext = currentPath.split('.').pop()?.toLowerCase();
     
-    // Direct function mapping for Next.js compatibility
     switch (ext) {
-      case 'js': return [langs.javascript()];
-      case 'jsx': return [langs.jsx()]; // JSX syntax support
-      case 'ts': return [langs.typescript()];
-      case 'tsx': return [langs.tsx()]; // TSX React tags support!
+      // 🚀 FIX: Grouped all JS/TS variants into a single robust parser
+      case 'js': 
+      case 'jsx': 
+      case 'ts': 
+      case 'tsx': 
+        return [langs.javascript({ jsx: true, typescript: true })];
+        
       case 'py': return [langs.python()];
       case 'html': 
       case 'htm': return [langs.html()];
@@ -134,7 +136,7 @@ export default function CodeEditorModal() {
             <CodeMirror
               value={text}
               theme={vscodeDark}
-              extensions={languageExtension} // <-- Correctly passing the array
+              extensions={languageExtension} 
               onChange={(val) => setText(val)}
               editable={!isSaving}
               height="100%"
