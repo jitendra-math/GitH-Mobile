@@ -1,8 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+// 1. Custom local font setup karo
+const sfUiText = localFont({
+  src: "./fonts/SFUIText-Regular.woff2", // Ensure karo ki path sahi ho
+  variable: "--font-sf-ui", // Tailwind ke liye variable
+  weight: "400",
+  style: "normal",
+  display: "swap",
+});
 
 // Setup viewport and theme color for mobile browsers
 export const viewport: Viewport = {
@@ -35,7 +42,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-gray-50 text-gray-900 min-h-screen`}>
+      {/* 2. Variable aur font-sans dono lagao body par */}
+      <body className={`${sfUiText.variable} font-sans bg-gray-50 text-gray-900 min-h-screen`}>
         {children}
       </body>
     </html>

@@ -6,7 +6,12 @@ const config: Config = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}"
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        // 3. Apna custom variable sans family ke default font mein daal do
+        sans: ['var(--font-sf-ui)', 'sans-serif'],
+      },
+    },
   },
   plugins: [],
 };
