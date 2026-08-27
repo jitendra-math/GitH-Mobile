@@ -4,7 +4,10 @@ import { useState, useEffect, useMemo } from "react";
 import { X, Save, FileCode2, Pencil } from "lucide-react";
 import CodeMirror from "@uiw/react-codemirror";
 import { vscodeDark } from "@uiw/codemirror-theme-vscode";
-import { langs } from "@uiw/codemirror-extensions-langs";
+import {
+  langs,
+  loadLanguage,
+} from "@uiw/codemirror-extensions-langs";
 import { useEditStore } from "@/store/useEditStore";
 import { encodeBase64 } from "@/lib/utils";
 import RenameFileModal from "./RenameFileModal";
@@ -31,17 +34,25 @@ export default function CodeEditorModal() {
     const ext = currentPath.split(".").pop()?.toLowerCase();
 
     switch (ext) {
-      // JavaScript / JSX
+      // JavaScript
       case "js":
+      case "mjs":
+      case "cjs":
+        return [loadLanguage("javascript")];
+
+      // JSX
       case "jsx":
-        return [langs.jsx()];
+        return [loadLanguage("jsx")];
 
-      // TypeScript / TSX
+      // TypeScript
       case "ts":
-        return [langs.typescript()];
+      case "mts":
+      case "cts":
+        return [loadLanguage("typescript")];
 
+      // TSX
       case "tsx":
-        return [langs.tsx()];
+        return [loadLanguage("tsx")];
 
       case "py":
         return [langs.python()];
@@ -57,6 +68,7 @@ export default function CodeEditorModal() {
         return [langs.json()];
 
       case "md":
+      case "markdown":
         return [langs.markdown()];
 
       case "java":
@@ -98,7 +110,6 @@ export default function CodeEditorModal() {
         return [langs.yaml()];
 
       default:
-        // Unknown extension = plain text
         return [];
     }
   }, [currentPath]);
