@@ -6,6 +6,7 @@ import { Download, Trash2, Pencil, Globe, Lock, GitBranch } from "lucide-react";
 import { deleteRepo, fetchBranches } from "@/actions/github";
 import { useEditStore } from "@/store/useEditStore";
 import DeleteConfirmModal from "./DeleteConfirmModal";
+import RepoInfoModal from "./RepoInfoModal";
 
 // Common language colors (fallback #808080 for unknown)
 const languageColors: Record<string, string> = {
@@ -39,6 +40,9 @@ export default function RepoCard({ repo }: { repo: any }) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // State for Info Modal
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+
   // States for Branch Selector
   const defaultBranch = repo.default_branch || "main";
   const [selectedBranch, setSelectedBranch] = useState(defaultBranch);
@@ -48,7 +52,7 @@ export default function RepoCard({ repo }: { repo: any }) {
   // Lazy load branches on focus/click
   const handleFetchBranches = async () => {
     if (branches.length > 1 || isFetchingBranches) return;
-    
+
     setIsFetchingBranches(true);
     try {
       const data = await fetchBranches(repo.owner.login, repo.name);
@@ -92,12 +96,13 @@ export default function RepoCard({ repo }: { repo: any }) {
   return (
     <>
       <div className="flex flex-col bg-white rounded-xl border border-[#d6d1c4] hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06),_0_0_0_1px_rgba(0,0,0,0.02)] hover:border-[rgba(181,172,138,0.4)] transition-all duration-200 overflow-hidden">
-        
-        {/* Upper Section: Repo Name (Truncated) + Badges (Fixed Right) */}
+
+        {/* Upper Section: Repo Name (clickable → opens Info Modal) + Badges (Fixed Right) */}
         <div className="bg-[#F5F1EC] p-3.5 flex items-center justify-between gap-3">
-          <div 
-            className="text-[15px] font-semibold text-[#1A1A1A] leading-snug truncate flex-1 min-w-0"
-            title={repo.name}
+          <div
+            onClick={() => setIsInfoModalOpen(true)}
+            className="text-[15px] font-semibold text-[#1A1A1A] leading-snug truncate flex-1 min-w-0 cursor-pointer hover:text-[#6D001A] transition-colors"
+            title={`View details for ${repo.name}`}
           >
             {repo.name}
           </div>
@@ -123,7 +128,7 @@ export default function RepoCard({ repo }: { repo: any }) {
 
         {/* Lower Section: Action Toolbar (Branch Selector + Buttons) */}
         <div className="bg-white p-2 px-3.5 flex items-center justify-between gap-2.5 border-t border-[rgba(181,172,138,0.25)]">
-          
+
           {/* Branch Selector (Left Side) */}
           <div className="relative flex items-center gap-1.5 bg-[#F5F1EC] border border-[rgba(181,172,138,0.3)] rounded-lg px-2 py-1">
             <GitBranch className="w-3.5 h-3.5 text-[#8a8a8a] shrink-0" />
@@ -182,8 +187,15 @@ export default function RepoCard({ repo }: { repo: any }) {
         </div>
       </div>
 
+      {/* Info Modal (opens on repo name click) */}
+      <RepoInfoModal
+        isOpen={isInfoModalOpen}
+        repo={repo}
+        onClose={() => setIsInfoModalOpen(false)}
+      />
+
       {/* Delete Confirmation Modal */}
-      <DeleteConfirmModal 
+      <DeleteConfirmModal
         isOpen={isDeleteModalOpen}
         repoName={repo.name}
         loading={isDeleting}
