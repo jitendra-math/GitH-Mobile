@@ -242,7 +242,7 @@ export default function TreeNode({
                 <button
                   onClick={handleDownload}
                   disabled={loading}
-                  className="flex-1 md:flex-none px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-[#007AFF]/12 text-[#007AFF] hover:bg-[#007AFF]/20 active:bg-[#007AFF]/25 transition-colors disabled:opacity-40"
+                  className="flex-1 md:flex-none px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-[#007AFF1F] text-[#007AFF] hover:bg-[#007AFF33] active:bg-[#007AFF40] transition-colors disabled:opacity-40"
                 >
                   {loading ? "…" : "Download"}
                 </button>
@@ -250,7 +250,7 @@ export default function TreeNode({
                 <button
                   onClick={handleCopy}
                   disabled={loading}
-                  className="flex-1 md:flex-none px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-[#007AFF]/12 text-[#007AFF] hover:bg-[#007AFF]/20 active:bg-[#007AFF]/25 transition-colors disabled:opacity-40"
+                  className="flex-1 md:flex-none px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-[#007AFF1F] text-[#007AFF] hover:bg-[#007AFF33] active:bg-[#007AFF40] transition-colors disabled:opacity-40"
                 >
                   {loading ? "…" : "Copy"}
                 </button>
@@ -262,7 +262,7 @@ export default function TreeNode({
                   <button
                     onClick={handleEdit}
                     disabled={loading}
-                    className="flex-1 md:flex-none px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-[#34C759]/12 text-[#34C759] hover:bg-[#34C759]/20 active:bg-[#34C759]/25 transition-colors disabled:opacity-40"
+                    className="flex-1 md:flex-none px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-[#34C7591F] text-[#34C759] hover:bg-[#34C75933] active:bg-[#34C75940] transition-colors disabled:opacity-40"
                   >
                     {loading ? "…" : "Edit"}
                   </button>
@@ -270,7 +270,7 @@ export default function TreeNode({
                   <button
                     onClick={handleReplace}
                     disabled={loading}
-                    className="flex-1 md:flex-none px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-[#FF9500]/12 text-[#FF9500] hover:bg-[#FF9500]/20 active:bg-[#FF9500]/25 transition-colors disabled:opacity-40"
+                    className="flex-1 md:flex-none px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-[#FF95001F] text-[#FF9500] hover:bg-[#FF950033] active:bg-[#FF950040] transition-colors disabled:opacity-40"
                   >
                     Replace
                   </button>
@@ -280,7 +280,7 @@ export default function TreeNode({
               <button
                 onClick={handleDelete}
                 disabled={loading}
-                className="flex-1 md:flex-none px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-[#FF3B30]/12 text-[#FF3B30] hover:bg-[#FF3B30]/20 active:bg-[#FF3B30]/25 transition-colors disabled:opacity-40"
+                className="flex-1 md:flex-none px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-[#FF3B301F] text-[#FF3B30] hover:bg-[#FF3B3033] active:bg-[#FF3B3040] transition-colors disabled:opacity-40"
               >
                 Delete
               </button>
