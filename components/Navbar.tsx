@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { MoreVertical, LogOut } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { MoreHorizontal, LogOut } from "lucide-react";
 import { logoutUser } from "@/actions/github";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -20,45 +20,50 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white shadow-sm">
-      <div className="flex h-14 items-center justify-between px-4 max-w-screen-md mx-auto w-full">
-        
-        {/* Brand Logo & Name */}
-        <div className="flex items-center gap-2.5">
-          <img 
-            src="/logo.png" 
-            alt="Brand Logo" 
-            className="w-6 h-6 object-cover rounded-sm"
+    <header className="sticky top-0 z-50 w-full bg-[#F2F2F7]/80 backdrop-blur-xl border-b border-[#C6C6C8]/40">
+      <div className="flex h-12 items-center justify-between px-4 max-w-screen-md mx-auto w-full">
+        {/* Brand */}
+        <div className="flex items-center gap-2 min-w-0">
+          <img
+            src="/logo.png"
+            alt="Logo"
+            className="w-7 h-7 rounded-[7px] object-cover shrink-0"
           />
-          <span className="font-bold text-gray-900 tracking-tight">GitHub Manager</span>
+          <span className="text-[17px] font-semibold text-black tracking-tight truncate">
+            GitHub Manager
+          </span>
         </div>
-        
-        {/* Actions (Kebab Menu) */}
-        <div className="relative" ref={menuRef}>
-          <button 
+
+        {/* Menu */}
+        <div className="relative shrink-0" ref={menuRef}>
+          <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="w-9 h-9 flex items-center justify-center rounded-full text-gray-600 hover:bg-gray-100 transition-colors"
-            title="Menu"
+            className="w-8 h-8 flex items-center justify-center rounded-full text-[#007AFF] active:bg-black/5 transition-colors"
+            aria-label="Menu"
           >
-            <MoreVertical className="w-5 h-5" />
+            <MoreHorizontal className="w-[22px] h-[22px]" strokeWidth={2.5} />
           </button>
 
-          {/* Dropdown Popup */}
-          {isMenuOpen && (
-            <div className="absolute right-0 mt-1.5 w-40 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-              <div className="p-1">
+          <AnimatePresence>
+            {isMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.94, y: -6 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.94, y: -6 }}
+                transition={{ type: "spring", damping: 28, stiffness: 400 }}
+                className="absolute right-0 mt-1.5 w-44 bg-[#F2F2F7]/95 backdrop-blur-xl rounded-[14px] shadow-2xl overflow-hidden origin-top-right"
+              >
                 <button
                   onClick={() => logoutUser()}
-                  className="flex items-center gap-2.5 w-full px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  className="w-full flex items-center gap-2.5 px-4 py-3 text-[16px] text-[#FF3B30] active:bg-black/5 transition-colors"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-4 h-4" strokeWidth={2.2} />
                   Logout
                 </button>
-              </div>
-            </div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-
       </div>
     </header>
   );
