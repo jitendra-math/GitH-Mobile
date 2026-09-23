@@ -85,7 +85,7 @@ export default function RepoInfoModal({ isOpen, repo, onClose }: RepoInfoModalPr
 
             {/* Header */}
             <div className="flex items-center justify-between px-4 pt-3 pb-3">
-              <h2 className="text-[17px] font-semibold text-black tracking-tight">
+              <h2 className="text-[16px] font-semibold text-black tracking-tight">
                 Repository
               </h2>
               <button
@@ -113,10 +113,10 @@ export default function RepoInfoModal({ isOpen, repo, onClose }: RepoInfoModalPr
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-[16px] font-semibold text-black truncate leading-tight">
+                  <h3 className="text-[15px] font-semibold text-black truncate leading-tight">
                     {repo.name}
                   </h3>
-                  <p className="text-[13px] text-[#8E8E93] truncate mt-0.5">
+                  <p className="text-[12px] text-[#8E8E93] truncate mt-0.5">
                     {repo.owner?.login || repo.full_name}
                   </p>
                 </div>
@@ -125,7 +125,7 @@ export default function RepoInfoModal({ isOpen, repo, onClose }: RepoInfoModalPr
               {/* Description */}
               {repo.description && (
                 <div className="bg-white rounded-2xl px-4 py-3 mb-3">
-                  <p className="text-[14px] text-black leading-snug">
+                  <p className="text-[13px] text-black leading-snug">
                     {repo.description}
                   </p>
                 </div>
@@ -185,7 +185,7 @@ export default function RepoInfoModal({ isOpen, repo, onClose }: RepoInfoModalPr
               {/* Visit Button */}
               <button
                 onClick={handleVisit}
-                className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#007AFF] active:bg-[#0062CC] text-white text-[16px] font-semibold rounded-2xl transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#007AFF] active:bg-[#0062CC] text-white text-[15px] font-semibold rounded-2xl transition-colors"
               >
                 <ExternalLink className="w-4 h-4" strokeWidth={2.5} />
                 Open on GitHub
@@ -222,8 +222,8 @@ function InfoRow({
         >
           {icon}
         </div>
-        <span className="text-[15px] text-black flex-1">{label}</span>
-        <span className="text-[15px] text-[#8E8E93] font-medium truncate max-w-[55%]">
+        <span className="text-[14px] text-black flex-1">{label}</span>
+        <span className="text-[14px] text-[#8E8E93] font-medium truncate max-w-[55%]">
           {value}
         </span>
       </div>
@@ -246,17 +246,17 @@ function StatCell({
   value: string;
 }) {
   return (
-    <div className="flex items-center gap-3 px-4 py-3">
+    <div className="flex flex-col items-center justify-center py-4 px-3 text-center">
       <div
-        className="w-8 h-8 rounded-[8px] flex items-center justify-center shrink-0 text-white"
+        className="w-8 h-8 rounded-[8px] flex items-center justify-center text-white mb-2"
         style={{ backgroundColor: iconBg }}
       >
         {icon}
       </div>
-      <div className="flex flex-col leading-tight">
-        <span className="text-[17px] font-semibold text-black">{value}</span>
-        <span className="text-[12px] text-[#8E8E93]">{label}</span>
-      </div>
+      <span className="text-[15px] font-semibold text-black leading-none">
+        {value}
+      </span>
+      <span className="text-[11px] text-[#8E8E93] mt-1">{label}</span>
     </div>
   );
 }
