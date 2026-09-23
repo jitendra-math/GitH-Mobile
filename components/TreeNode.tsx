@@ -1,29 +1,75 @@
 "use client";
 
 import { useState } from "react";
-import { Folder, FolderOpen, FileText } from "lucide-react";
+import {
+  Folder,
+  FolderOpen,
+  FileText,
+  Copy,
+  Download,
+  Pencil,
+  ClipboardPaste,
+  Trash2,
+} from "lucide-react";
 import { formatSize, encodeBase64, decodeBase64 } from "@/lib/utils";
 import { getFileContent } from "@/actions/github";
 import { useEditStore } from "@/store/useEditStore";
+import AlertModal from "./AlertModal";
+import ConfirmModal from "./ConfirmModal";
 
-export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nodeData: any }) {
+export default function TreeNode({
+  nodeName,
+  nodeData,
+}: {
+  nodeName: string;
+  nodeData: any;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  
-  // Yahan queue aur edit states ko nikal liya hai
-  const { owner, repo, branch, addToQueue, queue, isEditMode, setEditingFile } = useEditStore();
+
+  const [alertConfig, setAlertConfig] = useState({
+    isOpen: false,
+    message: "",
+    type: "error" as "info" | "success" | "error" | "warning",
+  });
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    confirmText: "",
+    onConfirm: () => {},
+  });
+
+  const showAlert = (
+    message: string,
+    type: "info" | "success" | "error" | "warning" = "error"
+  ) => setAlertConfig({ isOpen: true, message, type });
+
+  const showConfirm = (
+    title: string,
+    message: string,
+    confirmText: string,
+    onConfirm: () => void
+  ) => setConfirmConfig({ isOpen: true, title, message, confirmText, onConfirm });
+
+  const { owner, repo, branch, addToQueue, queue, isEditMode, setEditingFile } =
+    useEditStore();
 
   const isFolder = nodeData._info.type === "tree";
   const info = nodeData._info;
+  const queuedItem = !isFolder ? queue.find((q) => q.path === info.path) : null;
 
-  const queuedItem = !isFolder ? queue.find(q => q.path === info.path) : null;
-
-  // --- SMART BUTTON MATRIX LOGIC ---
   const sizeKB = (info.size || 0) / 1024;
-  const isLarge = sizeKB > 100; // Scenario 2 check (> 100 KB)
+  const isLarge = sizeKB > 100;
   const isBinary = Boolean(
     info.path?.match(/\.(png|jpe?g|gif|ico|webp|mp4|mp3|ttf|woff2?|eot|pdf|zip|tar|gz|rar|7z)$/i)
-  ); // Scenario 3 check (Media/Binary)
+  );
 
   const handleCopy = async () => {
     setLoading(true);
@@ -32,7 +78,7 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
       const decoded = decodeBase64(data.content);
       await navigator.clipboard.writeText(decoded);
     } catch (err: any) {
-      alert("Copy failed: " + err.message);
+      showAlert("Copy failed: " + err.message, "error");
     } finally {
       setLoading(false);
     }
@@ -42,7 +88,7 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
     setLoading(true);
     try {
       const data = await getFileContent(owner, repo, info.path, branch);
-      const cleanBase64 = data.content.replace(/\s/g, ''); 
+      const cleanBase64 = data.content.replace(/\s/g, "");
       const byteCharacters = atob(cleanBase64);
       const byteNumbers = new Array(byteCharacters.length);
       for (let i = 0; i < byteCharacters.length; i++) {
@@ -50,17 +96,17 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
       }
       const byteArray = new Uint8Array(byteNumbers);
       const blob = new Blob([byteArray]);
-      
+
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = nodeName; 
+      a.download = nodeName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      URL.revokeObjectURL(url); 
+      URL.revokeObjectURL(url);
     } catch (err: any) {
-      alert("Download failed: " + err.message);
+      showAlert("Download failed: " + err.message, "error");
     } finally {
       setLoading(false);
     }
@@ -69,17 +115,29 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
   const handleReplace = async () => {
     try {
       const text = await navigator.clipboard.readText();
-      if (!text) return alert("Clipboard is empty!");
-      if (!confirm(`Replace "${info.path}" with clipboard content?`)) return;
+      if (!text) return showAlert("Clipboard is empty!", "error");
 
-      const oldSize = info.size || 0;
-      const newSize = new Blob([text]).size;
-      const sizeDiff = newSize - oldSize;
-
-      const contentBase64 = encodeBase64(text);
-      addToQueue({ path: info.path, sha: info.sha, contentBase64, isDelete: false, sizeDiff });
+      showConfirm(
+        "Replace File?",
+        `Replace "${info.path}" with the content from your clipboard?`,
+        "Replace",
+        () => {
+          const oldSize = info.size || 0;
+          const newSize = new Blob([text]).size;
+          const sizeDiff = newSize - oldSize;
+          const contentBase64 = encodeBase64(text);
+          addToQueue({
+            path: info.path,
+            sha: info.sha,
+            contentBase64,
+            isDelete: false,
+            sizeDiff,
+          });
+          setConfirmConfig((p) => ({ ...p, isOpen: false }));
+        }
+      );
     } catch (err: any) {
-      alert("Replace failed: " + err.message);
+      showAlert("Replace failed: " + err.message, "error");
     }
   };
 
@@ -88,106 +146,188 @@ export default function TreeNode({ nodeName, nodeData }: { nodeName: string, nod
     try {
       const data = await getFileContent(owner, repo, info.path, branch);
       const decoded = decodeBase64(data.content);
-      
-      // Store mein file bhej do taaki modal open ho jaye
-      setEditingFile({ 
-        path: info.path, 
-        sha: info.sha, 
-        content: decoded, 
-        oldSize: info.size || 0 
+      setEditingFile({
+        path: info.path,
+        sha: info.sha,
+        content: decoded,
+        oldSize: info.size || 0,
       });
     } catch (err: any) {
-      alert("Edit failed: " + err.message);
+      showAlert("Edit failed: " + err.message, "error");
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = () => {
-    if (!confirm(`Delete "${info.path}"? It will be added to the queue.`)) return;
-    const oldSize = info.size || 0;
-    addToQueue({ path: info.path, sha: info.sha, isDelete: true, sizeDiff: -oldSize });
+    showConfirm(
+      "Delete File?",
+      `"${info.path}" will be added to the commit queue for deletion.`,
+      "Delete",
+      () => {
+        const oldSize = info.size || 0;
+        addToQueue({
+          path: info.path,
+          sha: info.sha,
+          isDelete: true,
+          sizeDiff: -oldSize,
+        });
+        setConfirmConfig((p) => ({ ...p, isOpen: false }));
+      }
+    );
   };
 
-  const childKeys = Object.keys(nodeData).filter(k => k !== "_info").sort((a, b) => {
-    const isDirA = nodeData[a]._info.type === "tree";
-    const isDirB = nodeData[b]._info.type === "tree";
-    if (isDirA && !isDirB) return -1;
-    if (!isDirA && isDirB) return 1;
-    return a.localeCompare(b);
-  });
+  const childKeys = Object.keys(nodeData)
+    .filter((k) => k !== "_info")
+    .sort((a, b) => {
+      const isDirA = nodeData[a]._info.type === "tree";
+      const isDirB = nodeData[b]._info.type === "tree";
+      if (isDirA && !isDirB) return -1;
+      if (!isDirA && isDirB) return 1;
+      return a.localeCompare(b);
+    });
 
   return (
-    <li className="list-none m-0 p-0">
-      <div className="flex flex-col md:flex-row md:items-center justify-between p-2 rounded-lg cursor-pointer hover:bg-black/5 transition-all mb-0.5 group">
-        
-        {isFolder ? (
-          <div className="flex items-center gap-2.5 flex-1 min-w-0" onClick={() => setIsOpen(!isOpen)}>
-            {isOpen ? <FolderOpen className="w-[18px] h-[18px] text-[#B5AC8A] shrink-0" /> : <Folder className="w-[18px] h-[18px] text-[#B5AC8A] shrink-0" />}
-            <span className="font-medium text-[14px] truncate text-[#1A1A1A]">{nodeName}</span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2.5 flex-1 min-w-0">
-            <FileText className="w-[18px] h-[18px] text-[#8a8a8a] shrink-0 group-hover:text-[#6D001A] transition-colors" />
-            <div className="flex flex-col min-w-0">
-              <span className={`font-medium text-[14px] truncate ${queuedItem?.isDelete ? 'line-through text-[#ff3b30] opacity-75' : 'text-[#1A1A1A]'}`}>
+    <>
+      <li className="list-none m-0 p-0">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-0 py-1.5 px-2 rounded-lg hover:bg-black/[0.03] transition-colors group">
+          {/* Left: Icon + Name */}
+          {isFolder ? (
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="flex items-center gap-2 flex-1 min-w-0 text-left"
+            >
+              {isOpen ? (
+                <FolderOpen className="w-[18px] h-[18px] text-[#FF9500] shrink-0" strokeWidth={2.2} />
+              ) : (
+                <Folder className="w-[18px] h-[18px] text-[#FF9500] shrink-0" strokeWidth={2.2} />
+              )}
+              <span className="font-medium text-[14px] truncate text-black">
                 {nodeName}
               </span>
-              <span className="text-[11px] text-[#8a8a8a] font-mono opacity-75">
-                {formatSize(sizeKB)}
-                {queuedItem && queuedItem.sizeDiff !== undefined && queuedItem.sizeDiff !== 0 && (
-                  <span className={`ml-1.5 font-bold ${queuedItem.sizeDiff > 0 ? "text-[#34c759]" : "text-[#ff3b30]"}`}>
-                    {queuedItem.sizeDiff > 0 ? "+" : ""}{(queuedItem.sizeDiff / 1024).toFixed(2)} KB
-                  </span>
-                )}
-              </span>
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <FileText
+                className="w-[18px] h-[18px] text-[#8E8E93] shrink-0 group-hover:text-[#007AFF] transition-colors"
+                strokeWidth={2.2}
+              />
+              <div className="flex flex-col min-w-0">
+                <span
+                  className={`font-medium text-[14px] truncate ${
+                    queuedItem?.isDelete
+                      ? "line-through text-[#FF3B30] opacity-70"
+                      : "text-black"
+                  }`}
+                >
+                  {nodeName}
+                </span>
+                <span className="text-[11px] text-[#8E8E93] font-mono opacity-80 flex items-center">
+                  {formatSize(sizeKB)}
+                  {queuedItem &&
+                    queuedItem.sizeDiff !== undefined &&
+                    queuedItem.sizeDiff !== 0 && (
+                      <span
+                        className={`ml-1.5 font-bold ${
+                          queuedItem.sizeDiff > 0
+                            ? "text-[#34C759]"
+                            : "text-[#FF3B30]"
+                        }`}
+                      >
+                        {queuedItem.sizeDiff > 0 ? "+" : ""}
+                        {(queuedItem.sizeDiff / 1024).toFixed(2)} KB
+                      </span>
+                    )}
+                </span>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Buttons */}
-        {!isFolder && (
-          <div className="flex items-center gap-2 mt-2 md:mt-0 pl-[28px] md:pl-0 w-full md:w-auto md:opacity-0 md:-translate-x-2 md:group-hover:opacity-100 md:group-hover:translate-x-0 transition-all shrink-0">
-            
-            {/* COPY / DOWNLOAD */}
-            {isBinary || isLarge ? (
-              <button onClick={handleDownload} disabled={loading} className="flex-1 md:flex-none px-3 py-1.5 text-[12px] font-semibold text-white bg-[#6D001A] rounded-xl hover:-translate-y-px hover:shadow-sm transition-all disabled:opacity-50">
-                {loading ? "..." : "Download"}
-              </button>
-            ) : (
-              <button onClick={handleCopy} disabled={loading} className="flex-1 md:flex-none px-3 py-1.5 text-[12px] font-semibold text-white bg-[#6D001A] rounded-xl hover:-translate-y-px hover:shadow-sm transition-all disabled:opacity-50">
-                {loading ? "..." : "Copy"}
-              </button>
-            )}
-
-            {/* EDIT / REPLACE SWITCH */}
-            {!isBinary && (
-              isEditMode ? (
-                <button onClick={handleEdit} disabled={loading} className="flex-1 md:flex-none px-3 py-1.5 text-[12px] font-semibold text-white bg-[#34c759] rounded-xl hover:-translate-y-px hover:shadow-sm transition-all disabled:opacity-50">
-                  {loading ? "..." : "Edit"}
+          {/* Right: Action Buttons */}
+          {!isFolder && (
+            <div className="flex items-center gap-1.5 mt-2 md:mt-0 pl-[26px] md:pl-0 w-full md:w-auto md:opacity-0 md:translate-x-2 md:group-hover:opacity-100 md:group-hover:translate-x-0 transition-all shrink-0">
+              {/* Copy / Download */}
+              {isBinary || isLarge ? (
+                <button
+                  onClick={handleDownload}
+                  disabled={loading}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-[#007AFF]/15 text-[#007AFF] active:bg-[#007AFF]/30 transition-colors disabled:opacity-40"
+                  title="Download"
+                >
+                  <Download className="w-4 h-4" strokeWidth={2.3} />
                 </button>
               ) : (
-                <button onClick={handleReplace} disabled={loading} className="flex-1 md:flex-none px-3 py-1.5 text-[12px] font-semibold text-white bg-[#B5AC8A] rounded-xl hover:-translate-y-px hover:shadow-sm transition-all disabled:opacity-50">
-                  Replace
+                <button
+                  onClick={handleCopy}
+                  disabled={loading}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-[#007AFF]/15 text-[#007AFF] active:bg-[#007AFF]/30 transition-colors disabled:opacity-40"
+                  title="Copy content"
+                >
+                  <Copy className="w-4 h-4" strokeWidth={2.3} />
                 </button>
-              )
-            )}
+              )}
 
-            {/* DELETE */}
-            <button onClick={handleDelete} disabled={loading} className="flex-1 md:flex-none px-3 py-1.5 text-[12px] font-semibold text-white bg-gradient-to-br from-[#ff3b30] to-[#ff453a] rounded-xl hover:-translate-y-px hover:shadow-sm transition-all disabled:opacity-50">
-              Delete
-            </button>
-          </div>
+              {/* Edit / Replace */}
+              {!isBinary &&
+                (isEditMode ? (
+                  <button
+                    onClick={handleEdit}
+                    disabled={loading}
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-[#34C759]/15 text-[#34C759] active:bg-[#34C759]/30 transition-colors disabled:opacity-40"
+                    title="Edit"
+                  >
+                    <Pencil className="w-4 h-4" strokeWidth={2.3} />
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleReplace}
+                    disabled={loading}
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-[#FF9500]/15 text-[#FF9500] active:bg-[#FF9500]/30 transition-colors disabled:opacity-40"
+                    title="Replace with clipboard"
+                  >
+                    <ClipboardPaste className="w-4 h-4" strokeWidth={2.3} />
+                  </button>
+                ))}
+
+              {/* Delete */}
+              <button
+                onClick={handleDelete}
+                disabled={loading}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-[#FF3B30]/15 text-[#FF3B30] active:bg-[#FF3B30]/30 transition-colors disabled:opacity-40"
+                title="Delete"
+              >
+                <Trash2 className="w-4 h-4" strokeWidth={2.3} />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Children */}
+        {isFolder && isOpen && (
+          <ul className="pl-4 border-l border-[#C6C6C8]/40 ml-3 mt-0.5">
+            {childKeys.map((key) => (
+              <TreeNode key={key} nodeName={key} nodeData={nodeData[key]} />
+            ))}
+          </ul>
         )}
-      </div>
+      </li>
 
-      {isFolder && isOpen && (
-        <ul className="pl-5 border-l border-[rgba(181,172,138,0.25)] ml-2 mt-0.5 animate-in fade-in slide-in-from-top-1">
-          {childKeys.map(key => (
-            <TreeNode key={key} nodeName={key} nodeData={nodeData[key]} />
-          ))}
-        </ul>
-      )}
-    </li>
+      {/* Modals */}
+      <AlertModal
+        isOpen={alertConfig.isOpen}
+        message={alertConfig.message}
+        type={alertConfig.type}
+        onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
+      />
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        isDestructive={confirmConfig.confirmText === "Delete"}
+        onConfirm={confirmConfig.onConfirm}
+        onCancel={() => setConfirmConfig((p) => ({ ...p, isOpen: false }))}
+      />
+    </>
   );
 }
