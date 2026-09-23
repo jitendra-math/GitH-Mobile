@@ -10,6 +10,7 @@ import {
   Lock,
   GitBranch,
   ChevronRight,
+  FolderGit2,
 } from "lucide-react";
 import { deleteRepo, fetchBranches } from "@/actions/github";
 import { useEditStore } from "@/store/useEditStore";
@@ -45,7 +46,6 @@ export default function RepoCard({ repo }: { repo: any }) {
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
 
   const defaultBranch = repo.default_branch || "main";
@@ -55,13 +55,10 @@ export default function RepoCard({ repo }: { repo: any }) {
 
   const handleFetchBranches = async () => {
     if (branches.length > 1 || isFetchingBranches) return;
-
     setIsFetchingBranches(true);
     try {
       const data = await fetchBranches(repo.owner.login, repo.name);
-      if (data && Array.isArray(data)) {
-        setBranches(data);
-      }
+      if (data && Array.isArray(data)) setBranches(data);
     } catch (err) {
       console.error("Failed to fetch branches", err);
     } finally {
@@ -89,14 +86,26 @@ export default function RepoCard({ repo }: { repo: any }) {
   const language = repo.language || null;
   const langColor = language ? languageColors[language] || languageColors.default : null;
 
+  // iOS Settings style — blue for public, orange for private
+  const iconColor = isPrivate ? "#FF9500" : "#007AFF";
+
   return (
     <>
       <div className="bg-white rounded-2xl overflow-hidden">
-        {/* Top Row: Repo info (tappable) */}
+        {/* Main Row — tap opens Info modal */}
         <button
           onClick={() => setIsInfoModalOpen(true)}
-          className="w-full flex items-center justify-between gap-3 px-4 pt-3.5 pb-3 active:bg-black/[0.03] transition-colors text-left"
+          className="w-full flex items-center gap-3 px-4 py-3 active:bg-black/[0.04] transition-colors text-left"
         >
+          {/* iOS App Icon style square */}
+          <div
+            className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0"
+            style={{ backgroundColor: iconColor }}
+          >
+            <FolderGit2 className="w-[22px] h-[22px] text-white" strokeWidth={2.2} />
+          </div>
+
+          {/* Text block */}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 min-w-0">
               <h3 className="text-[16px] font-semibold text-black truncate leading-tight">
@@ -108,41 +117,37 @@ export default function RepoCard({ repo }: { repo: any }) {
                 <Globe className="w-3 h-3 text-[#8E8E93] shrink-0" strokeWidth={2.5} />
               )}
             </div>
-
-            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+            <div className="flex items-center gap-1.5 mt-0.5">
               {language && (
-                <span className="inline-flex items-center gap-1.5 text-[12px] text-[#8E8E93]">
+                <>
                   <span
-                    className="w-2 h-2 rounded-full"
+                    className="w-2 h-2 rounded-full shrink-0"
                     style={{ backgroundColor: langColor || "#808080" }}
                   />
-                  {language}
-                </span>
+                  <span className="text-[13px] text-[#8E8E93] truncate">{language}</span>
+                  <span className="text-[#C6C6C8] text-[11px]">·</span>
+                </>
               )}
-              {language && <span className="text-[#C6C6C8] text-[10px]">·</span>}
-              <span className="text-[12px] text-[#8E8E93]">
+              <span className="text-[13px] text-[#8E8E93]">
                 {isPrivate ? "Private" : "Public"}
               </span>
             </div>
           </div>
 
-          <ChevronRight
-            className="w-4 h-4 text-[#C6C6C8] shrink-0"
-            strokeWidth={2.5}
-          />
+          <ChevronRight className="w-4 h-4 text-[#C6C6C8] shrink-0" strokeWidth={2.5} />
         </button>
 
-        {/* Bottom Row: Branch selector + Actions */}
-        <div className="flex items-center justify-between gap-2 px-3 py-2 border-t border-[#C6C6C8]/25 bg-[#F2F2F7]/40">
-          {/* Branch Selector */}
-          <div className="relative flex items-center gap-1.5 bg-white rounded-lg pl-2 pr-1 py-1.5 border border-[#C6C6C8]/50 min-w-0 max-w-[55%]">
-            <GitBranch className="w-3.5 h-3.5 text-[#8E8E93] shrink-0" strokeWidth={2.2} />
+        {/* Actions Row */}
+        <div className="flex items-center justify-between gap-2 px-3 py-2 border-t border-[#C6C6C8]/25">
+          {/* Branch chip */}
+          <div className="relative flex items-center gap-1 bg-[#F2F2F7] rounded-lg pl-2 pr-1 py-1 min-w-0 max-w-[50%]">
+            <GitBranch className="w-3 h-3 text-[#8E8E93] shrink-0" strokeWidth={2.2} />
             <select
               value={selectedBranch}
               onChange={(e) => setSelectedBranch(e.target.value)}
               onFocus={handleFetchBranches}
               onClick={handleFetchBranches}
-              className="bg-transparent text-[12px] font-medium text-black outline-none cursor-pointer appearance-none truncate w-full"
+              className="bg-transparent text-[12px] font-medium text-black outline-none cursor-pointer appearance-none truncate w-full pr-3"
               title="Select Branch"
             >
               {isFetchingBranches && branches.length === 1 ? (
@@ -155,7 +160,7 @@ export default function RepoCard({ repo }: { repo: any }) {
                 ))
               )}
             </select>
-            <div className="pointer-events-none pr-1 shrink-0">
+            <div className="absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none">
               <svg
                 width="8"
                 height="8"
@@ -172,11 +177,11 @@ export default function RepoCard({ repo }: { repo: any }) {
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-1.5 shrink-0">
+          {/* Action icons — plain, iOS style */}
+          <div className="flex items-center gap-0.5 shrink-0">
             <button
               onClick={() => openModal(repo.owner.login, repo.name, selectedBranch)}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-[#007AFF]/10 text-[#007AFF] active:bg-[#007AFF]/20 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-[#007AFF] active:bg-[#007AFF]/10 transition-colors"
               title="Edit Repository"
             >
               <Pencil className="w-4 h-4" strokeWidth={2.2} />
@@ -184,7 +189,7 @@ export default function RepoCard({ repo }: { repo: any }) {
 
             <button
               onClick={handleDownload}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-[#34C759]/10 text-[#34C759] active:bg-[#34C759]/20 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-[#8E8E93] active:bg-black/5 transition-colors"
               title="Download ZIP"
             >
               <Download className="w-4 h-4" strokeWidth={2.2} />
@@ -192,7 +197,7 @@ export default function RepoCard({ repo }: { repo: any }) {
 
             <button
               onClick={() => setIsDeleteModalOpen(true)}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-[#FF3B30]/10 text-[#FF3B30] active:bg-[#FF3B30]/20 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-lg text-[#FF3B30] active:bg-[#FF3B30]/10 transition-colors"
               title="Delete Repository"
             >
               <Trash2 className="w-4 h-4" strokeWidth={2.2} />
@@ -201,14 +206,12 @@ export default function RepoCard({ repo }: { repo: any }) {
         </div>
       </div>
 
-      {/* Info Modal */}
       <RepoInfoModal
         isOpen={isInfoModalOpen}
         repo={repo}
         onClose={() => setIsInfoModalOpen(false)}
       />
 
-      {/* Delete Confirm */}
       <DeleteConfirmModal
         isOpen={isDeleteModalOpen}
         repoName={repo.name}
