@@ -35,14 +35,13 @@ export default function TokenForm() {
           name="token"
           id="token"
           required
-          autoFocus
           autoComplete="off"
           autoCapitalize="off"
           autoCorrect="off"
           spellCheck={false}
           enterKeyHint="go"
           placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
-          className="block w-full pl-11 pr-11 py-3.5 bg-white rounded-[10px] text-[15px] text-black placeholder:text-[#8E8E93] outline-none focus:ring-2 focus:ring-[#007AFF66] transition-all"
+          className="block w-full pl-11 pr-11 py-3 bg-white rounded-[10px] text-[15px] text-black placeholder:text-[#8E8E93] outline-none focus:ring-2 focus:ring-[#007AFF66] transition-all"
         />
         <button
           type="button"
@@ -76,7 +75,7 @@ export default function TokenForm() {
       <button
         type="submit"
         disabled={loading}
-        className="mt-1 w-full py-3.5 bg-[#007AFF] active:bg-[#0062CC] text-white text-[17px] font-semibold rounded-2xl transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
+        className="w-full py-3 bg-[#007AFF] active:bg-[#0062CC] text-white text-[16px] font-semibold rounded-2xl transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
       >
         {loading && (
           <svg
@@ -102,11 +101,6 @@ export default function TokenForm() {
         )}
         {loading ? "Signing in…" : "Sign In"}
       </button>
-
-      {/* Footnote */}
-      <p className="text-[12px] text-[#8E8E93] text-center leading-snug mt-1">
-        Your token is stored securely on your device.
-      </p>
     </form>
   );
 }
