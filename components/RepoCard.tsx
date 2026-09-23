@@ -104,7 +104,7 @@ export default function RepoCard({ repo }: { repo: any }) {
 
           <div className="flex items-center gap-1.5 shrink-0">
             {language && (
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-[#F2F2F7] border border-[#C6C6C8]/40 text-black/70">
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-semibold rounded-full bg-[#F2F2F7] text-black/70">
                 <span
                   className="w-2 h-2 rounded-full"
                   style={{ backgroundColor: langColor || "#808080" }}
@@ -115,8 +115,8 @@ export default function RepoCard({ repo }: { repo: any }) {
             <span
               className={`inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full ${
                 isPrivate
-                  ? "bg-[#FF9500]/10 text-[#FF9500] border border-[#FF9500]/20"
-                  : "bg-[#34C759]/10 text-[#34C759] border border-[#34C759]/20"
+                  ? "bg-[#FF9500]/10 text-[#FF9500]"
+                  : "bg-[#34C759]/10 text-[#34C759]"
               }`}
             >
               {isPrivate ? (
@@ -130,10 +130,10 @@ export default function RepoCard({ repo }: { repo: any }) {
         </div>
 
         {/* Lower Section: Action Toolbar */}
-        <div className="bg-[#F5F1EC] p-2 px-3.5 flex items-center justify-between gap-2.5 border-t border-[#E5DFD0]">
+        <div className="bg-[#F2F2F7] p-2 px-3.5 flex items-center justify-between gap-2.5 border-t border-[#C6C6C8]/40">
 
           {/* Branch Selector */}
-          <div className="relative flex items-center gap-1.5 bg-white border border-[#DDD5C4] rounded-lg px-2 py-1 min-w-0">
+          <div className="relative flex items-center gap-1.5 bg-white border border-[#C6C6C8]/50 rounded-lg px-2 py-1 min-w-0">
             <GitBranch className="w-3.5 h-3.5 text-[#8E8E93] shrink-0" strokeWidth={2.2} />
             <select
               value={selectedBranch}
