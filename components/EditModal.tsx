@@ -8,10 +8,9 @@ import {
   Check,
   CopyCheck,
   History,
+  ArrowLeft,
   UploadCloud,
   Pencil,
-  GitBranch,
-  FolderTree,
 } from "lucide-react";
 import { useEditStore } from "@/store/useEditStore";
 import {
@@ -216,15 +215,14 @@ export default function EditModal() {
             {/* Header */}
             <div className="sticky top-0 z-10 bg-[#F2F2F7] border-b border-[#C6C6C8]/40 shrink-0">
               {/* Title Row */}
-              <div className="flex items-center justify-between gap-3 px-4 pt-2 pb-2">
-                <div className="min-w-0 flex-1 flex items-center gap-2">
-                  <h3 className="text-[16px] font-semibold text-black truncate">
+              <div className="flex items-center justify-between gap-3 px-4 pt-2 pb-3">
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-[16px] font-semibold text-black truncate leading-tight">
                     {repo}
                   </h3>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-[#8E8E93]/15 rounded-full text-[11px] font-medium text-[#8E8E93] shrink-0">
-                    <GitBranch className="w-2.5 h-2.5" strokeWidth={2.5} />
-                    {branch}
-                  </span>
+                  <p className="text-[12px] text-[#8E8E93] truncate mt-0.5">
+                    {owner} · {branch}
+                  </p>
                 </div>
                 <button
                   onClick={closeModal}
@@ -236,81 +234,78 @@ export default function EditModal() {
               </div>
 
               {/* Tools Row */}
-              <div className="flex items-center gap-2 px-4 pb-2.5">
-                {/* Segmented Control */}
-                <div className="bg-[#767680]/[0.12] rounded-[9px] p-[3px] flex gap-0.5 w-[180px] shrink-0">
+              <div className="flex items-center gap-1.5 px-4 pb-3 overflow-x-auto no-scrollbar">
+                {/* History / Back to Tree */}
+                {view === "history" ? (
                   <button
                     onClick={() => setView("tree")}
-                    className={`flex-1 flex items-center justify-center gap-1 py-[5px] text-[12px] rounded-[7px] transition-all duration-150 ${
-                      view === "tree"
-                        ? "bg-white text-black font-semibold shadow-[0_1px_3px_rgba(0,0,0,0.08)]"
-                        : "text-black/60 font-medium"
-                    }`}
+                    className="h-8 px-3 flex items-center gap-1.5 rounded-lg bg-[#007AFF] active:bg-[#0062CC] text-white transition-colors text-[12px] font-semibold shrink-0"
                   >
-                    <FolderTree className="w-3 h-3" strokeWidth={2.4} />
-                    Tree
+                    <ArrowLeft className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    <span>Back to Tree</span>
                   </button>
+                ) : (
                   <button
                     onClick={handleLoadHistory}
-                    className={`flex-1 flex items-center justify-center gap-1 py-[5px] text-[12px] rounded-[7px] transition-all duration-150 ${
-                      view === "history"
-                        ? "bg-white text-black font-semibold shadow-[0_1px_3px_rgba(0,0,0,0.08)]"
-                        : "text-black/60 font-medium"
-                    }`}
+                    className="h-8 px-3 flex items-center gap-1.5 rounded-lg bg-[#007AFF] active:bg-[#0062CC] text-white transition-colors text-[12px] font-semibold shrink-0"
                   >
-                    <History className="w-3 h-3" strokeWidth={2.4} />
-                    History
+                    <History className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    <span>History</span>
                   </button>
-                </div>
+                )}
 
-                {/* Icon Buttons */}
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-1">
-                  {view === "tree" && (
-                    <button
-                      onClick={toggleEditMode}
-                      className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors shrink-0 ${
-                        isEditMode
-                          ? "bg-[#007AFF] text-white"
-                          : "bg-[#007AFF]/12 text-[#007AFF]"
-                      }`}
-                      title={`Edit Mode ${isEditMode ? "ON" : "OFF"}`}
-                    >
-                      <Pencil className="w-4 h-4" strokeWidth={2.3} />
-                    </button>
+                <div className="w-px h-4 bg-[#C6C6C8]/60 mx-0.5 shrink-0" />
+
+                {/* Edit Mode Toggle */}
+                {view === "tree" && (
+                  <button
+                    onClick={toggleEditMode}
+                    className={`h-8 px-3 flex items-center gap-1.5 rounded-lg transition-colors text-[12px] font-semibold shrink-0 ${
+                      isEditMode
+                        ? "bg-[#34C759] active:bg-[#2AA34A] text-white"
+                        : "bg-white border border-[#C6C6C8]/60 text-black active:bg-[#E5E5EA]"
+                    }`}
+                    title="Toggle Edit Mode"
+                  >
+                    <Pencil className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    <span>Edit Mode {isEditMode ? "ON" : "OFF"}</span>
+                  </button>
+                )}
+
+                {/* Upload */}
+                <button
+                  onClick={() => setIsFileUploadModalOpen(true)}
+                  className="h-8 px-3 flex items-center gap-1.5 rounded-lg bg-white border border-[#C6C6C8]/60 text-black active:bg-[#E5E5EA] transition-colors text-[12px] font-semibold shrink-0"
+                >
+                  <UploadCloud className="w-3.5 h-3.5" strokeWidth={2.5} />
+                  <span>Upload</span>
+                </button>
+
+                {/* Bulk Actions */}
+                <button
+                  onClick={() => setIsBulkModalOpen(true)}
+                  className="h-8 px-3 flex items-center gap-1.5 rounded-lg bg-[#AF52DE] active:bg-[#8E42B3] text-white transition-colors text-[12px] font-semibold shrink-0"
+                >
+                  <CopyCheck className="w-3.5 h-3.5" strokeWidth={2.5} />
+                  <span>Bulk Actions</span>
+                </button>
+
+                {/* Copy Structure */}
+                <button
+                  onClick={handleCopyStructure}
+                  className={`h-8 px-3 flex items-center gap-1.5 rounded-lg transition-colors text-[12px] font-semibold shrink-0 ${
+                    copiedStructure
+                      ? "bg-[#34C759] active:bg-[#2AA34A] text-white"
+                      : "bg-white border border-[#C6C6C8]/60 text-black active:bg-[#E5E5EA]"
+                  }`}
+                >
+                  {copiedStructure ? (
+                    <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
+                  ) : (
+                    <Copy className="w-3.5 h-3.5" strokeWidth={2.5} />
                   )}
-
-                  <button
-                    onClick={() => setIsFileUploadModalOpen(true)}
-                    className="w-8 h-8 flex items-center justify-center rounded-full bg-[#007AFF]/12 text-[#007AFF] active:bg-[#007AFF]/25 transition-colors shrink-0"
-                    title="Upload Files"
-                  >
-                    <UploadCloud className="w-4 h-4" strokeWidth={2.3} />
-                  </button>
-
-                  <button
-                    onClick={() => setIsBulkModalOpen(true)}
-                    className="w-8 h-8 flex items-center justify-center rounded-full bg-[#AF52DE]/12 text-[#AF52DE] active:bg-[#AF52DE]/25 transition-colors shrink-0"
-                    title="Bulk Actions"
-                  >
-                    <CopyCheck className="w-4 h-4" strokeWidth={2.3} />
-                  </button>
-
-                  <button
-                    onClick={handleCopyStructure}
-                    className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors shrink-0 ${
-                      copiedStructure
-                        ? "bg-[#34C759] text-white"
-                        : "bg-[#34C759]/12 text-[#34C759] active:bg-[#34C759]/25"
-                    }`}
-                    title={copiedStructure ? "Copied!" : "Copy Structure"}
-                  >
-                    {copiedStructure ? (
-                      <Check className="w-4 h-4" strokeWidth={2.5} />
-                    ) : (
-                      <Copy className="w-4 h-4" strokeWidth={2.3} />
-                    )}
-                  </button>
-                </div>
+                  <span>{copiedStructure ? "Copied!" : "Copy Structure"}</span>
+                </button>
               </div>
             </div>
 
@@ -318,11 +313,29 @@ export default function EditModal() {
             <div className="flex-1 overflow-y-auto px-3 py-3 custom-scrollbar">
               {loading ? (
                 <div className="flex items-center justify-center py-16 gap-2">
-                  <svg className="w-5 h-5 animate-spin text-[#8E8E93]" viewBox="0 0 24 24" fill="none">
-                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeOpacity="0.25" />
-                    <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                  <svg
+                    className="w-5 h-5 animate-spin text-[#8E8E93]"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeOpacity="0.25"
+                    />
+                    <path
+                      d="M21 12a9 9 0 0 0-9-9"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                    />
                   </svg>
-                  <span className="text-[13px] text-[#8E8E93] font-medium">Loading…</span>
+                  <span className="text-[13px] text-[#8E8E93] font-medium">
+                    Loading…
+                  </span>
                 </div>
               ) : view === "tree" ? (
                 treeData ? (
@@ -330,7 +343,11 @@ export default function EditModal() {
                     {Object.keys(treeData)
                       .filter((k) => k !== "_info")
                       .map((key) => (
-                        <TreeNode key={key} nodeName={key} nodeData={treeData[key]} />
+                        <TreeNode
+                          key={key}
+                          nodeName={key}
+                          nodeData={treeData[key]}
+                        />
                       ))}
                   </ul>
                 ) : null
@@ -341,7 +358,10 @@ export default function EditModal() {
                     const formattedDate =
                       date.toLocaleDateString() +
                       " " +
-                      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+                      date.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      });
                     const isLatest = index === 0;
 
                     return (
@@ -420,13 +440,17 @@ export default function EditModal() {
                       <div
                         key={item.path}
                         className={`flex items-center justify-between gap-2 p-2 rounded-xl bg-white ${
-                          item.isDelete ? "border-l-[3px] border-l-[#FF3B30]" : ""
+                          item.isDelete
+                            ? "border-l-[3px] border-l-[#FF3B30]"
+                            : ""
                         }`}
                       >
                         <div className="flex items-center min-w-0 flex-1">
                           <span className="text-[12px] font-mono text-black truncate">
                             {item.isDelete && (
-                              <span className="text-[#FF3B30] font-bold mr-1">DEL</span>
+                              <span className="text-[#FF3B30] font-bold mr-1">
+                                DEL
+                              </span>
                             )}
                             {item.path}
                           </span>
@@ -450,9 +474,25 @@ export default function EditModal() {
                     className="flex-1 py-3 bg-[#007AFF] active:bg-[#0062CC] text-white text-[15px] font-semibold rounded-2xl transition-colors disabled:opacity-40 flex items-center justify-center gap-2"
                   >
                     {committing && (
-                      <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeOpacity="0.3" />
-                        <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                      <svg
+                        className="w-4 h-4 animate-spin"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="9"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeOpacity="0.3"
+                        />
+                        <path
+                          d="M21 12a9 9 0 0 0-9-9"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                        />
                       </svg>
                     )}
                     {committing ? "Committing…" : "Commit"}
@@ -499,7 +539,9 @@ export default function EditModal() {
             commitSha={rollbackConfig.sha}
             commitMsg={rollbackConfig.msg}
             loading={isRollingBack}
-            onCancel={() => setRollbackConfig({ ...rollbackConfig, isOpen: false })}
+            onCancel={() =>
+              setRollbackConfig({ ...rollbackConfig, isOpen: false })
+            }
             onConfirm={executeRollback}
           />
         </>

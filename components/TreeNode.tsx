@@ -1,16 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Folder,
-  FolderOpen,
-  FileText,
-  Copy,
-  Download,
-  Pencil,
-  ClipboardPaste,
-  Trash2,
-} from "lucide-react";
+import { Folder, FolderOpen, FileText } from "lucide-react";
 import { formatSize, encodeBase64, decodeBase64 } from "@/lib/utils";
 import { getFileContent } from "@/actions/github";
 import { useEditStore } from "@/store/useEditStore";
@@ -190,12 +181,12 @@ export default function TreeNode({
   return (
     <>
       <li className="list-none m-0 p-0">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-1 md:gap-0 py-1.5 px-2 rounded-lg hover:bg-black/[0.03] transition-colors group">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-3 py-2 px-3 rounded-xl hover:bg-black/[0.03] transition-colors group">
           {/* Left: Icon + Name */}
           {isFolder ? (
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="flex items-center gap-2 flex-1 min-w-0 text-left"
+              className="flex items-center gap-2.5 flex-1 min-w-0 text-left"
             >
               {isOpen ? (
                 <FolderOpen className="w-[18px] h-[18px] text-[#FF9500] shrink-0" strokeWidth={2.2} />
@@ -207,7 +198,7 @@ export default function TreeNode({
               </span>
             </button>
           ) : (
-            <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="flex items-center gap-2.5 flex-1 min-w-0">
               <FileText
                 className="w-[18px] h-[18px] text-[#8E8E93] shrink-0 group-hover:text-[#007AFF] transition-colors"
                 strokeWidth={2.2}
@@ -243,27 +234,25 @@ export default function TreeNode({
             </div>
           )}
 
-          {/* Right: Action Buttons */}
+          {/* Right: Action Pills */}
           {!isFolder && (
-            <div className="flex items-center gap-1.5 mt-2 md:mt-0 pl-[26px] md:pl-0 w-full md:w-auto md:opacity-0 md:translate-x-2 md:group-hover:opacity-100 md:group-hover:translate-x-0 transition-all shrink-0">
+            <div className="flex items-center gap-1.5 mt-1 md:mt-0 pl-[28px] md:pl-0 w-full md:w-auto md:opacity-0 md:translate-x-2 md:group-hover:opacity-100 md:group-hover:translate-x-0 transition-all shrink-0">
               {/* Copy / Download */}
               {isBinary || isLarge ? (
                 <button
                   onClick={handleDownload}
                   disabled={loading}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-[#007AFF]/15 text-[#007AFF] active:bg-[#007AFF]/30 transition-colors disabled:opacity-40"
-                  title="Download"
+                  className="flex-1 md:flex-none px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-[#007AFF]/12 text-[#007AFF] hover:bg-[#007AFF]/20 active:bg-[#007AFF]/25 transition-colors disabled:opacity-40"
                 >
-                  <Download className="w-4 h-4" strokeWidth={2.3} />
+                  {loading ? "…" : "Download"}
                 </button>
               ) : (
                 <button
                   onClick={handleCopy}
                   disabled={loading}
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-[#007AFF]/15 text-[#007AFF] active:bg-[#007AFF]/30 transition-colors disabled:opacity-40"
-                  title="Copy content"
+                  className="flex-1 md:flex-none px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-[#007AFF]/12 text-[#007AFF] hover:bg-[#007AFF]/20 active:bg-[#007AFF]/25 transition-colors disabled:opacity-40"
                 >
-                  <Copy className="w-4 h-4" strokeWidth={2.3} />
+                  {loading ? "…" : "Copy"}
                 </button>
               )}
 
@@ -273,19 +262,17 @@ export default function TreeNode({
                   <button
                     onClick={handleEdit}
                     disabled={loading}
-                    className="w-8 h-8 flex items-center justify-center rounded-full bg-[#34C759]/15 text-[#34C759] active:bg-[#34C759]/30 transition-colors disabled:opacity-40"
-                    title="Edit"
+                    className="flex-1 md:flex-none px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-[#34C759]/12 text-[#34C759] hover:bg-[#34C759]/20 active:bg-[#34C759]/25 transition-colors disabled:opacity-40"
                   >
-                    <Pencil className="w-4 h-4" strokeWidth={2.3} />
+                    {loading ? "…" : "Edit"}
                   </button>
                 ) : (
                   <button
                     onClick={handleReplace}
                     disabled={loading}
-                    className="w-8 h-8 flex items-center justify-center rounded-full bg-[#FF9500]/15 text-[#FF9500] active:bg-[#FF9500]/30 transition-colors disabled:opacity-40"
-                    title="Replace with clipboard"
+                    className="flex-1 md:flex-none px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-[#FF9500]/12 text-[#FF9500] hover:bg-[#FF9500]/20 active:bg-[#FF9500]/25 transition-colors disabled:opacity-40"
                   >
-                    <ClipboardPaste className="w-4 h-4" strokeWidth={2.3} />
+                    Replace
                   </button>
                 ))}
 
@@ -293,10 +280,9 @@ export default function TreeNode({
               <button
                 onClick={handleDelete}
                 disabled={loading}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-[#FF3B30]/15 text-[#FF3B30] active:bg-[#FF3B30]/30 transition-colors disabled:opacity-40"
-                title="Delete"
+                className="flex-1 md:flex-none px-3 py-1.5 text-[11px] font-semibold rounded-lg bg-[#FF3B30]/12 text-[#FF3B30] hover:bg-[#FF3B30]/20 active:bg-[#FF3B30]/25 transition-colors disabled:opacity-40"
               >
-                <Trash2 className="w-4 h-4" strokeWidth={2.3} />
+                Delete
               </button>
             </div>
           )}
@@ -304,7 +290,7 @@ export default function TreeNode({
 
         {/* Children */}
         {isFolder && isOpen && (
-          <ul className="pl-4 border-l border-[#C6C6C8]/40 ml-3 mt-0.5">
+          <ul className="pl-5 border-l border-[#C6C6C8]/40 ml-2 mt-0.5">
             {childKeys.map((key) => (
               <TreeNode key={key} nodeName={key} nodeData={nodeData[key]} />
             ))}
