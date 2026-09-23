@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import AlertModal from "./AlertModal";
 
 interface RenameFileModalProps {
@@ -11,21 +11,27 @@ interface RenameFileModalProps {
   onSave: (newPath: string) => void;
 }
 
-export default function RenameFileModal({ isOpen, onClose, currentPath, onSave }: RenameFileModalProps) {
+export default function RenameFileModal({
+  isOpen,
+  onClose,
+  currentPath,
+  onSave,
+}: RenameFileModalProps) {
   const [newPath, setNewPath] = useState(currentPath);
-  const [alertConfig, setAlertConfig] = useState({ isOpen: false, message: "", type: "error" as const });
+  const [alertConfig, setAlertConfig] = useState({
+    isOpen: false,
+    message: "",
+    type: "error" as const,
+  });
 
   useEffect(() => {
     if (isOpen) setNewPath(currentPath);
   }, [isOpen, currentPath]);
 
-  if (!isOpen) return null;
-
   const handleSave = () => {
-    // Extension nikalne ka logic
     const getExt = (p: string) => {
-      const parts = p.split('.');
-      return parts.length > 1 ? parts.pop()?.toLowerCase() : '';
+      const parts = p.split(".");
+      return parts.length > 1 ? parts.pop()?.toLowerCase() : "";
     };
 
     const oldExt = getExt(currentPath);
@@ -34,14 +40,20 @@ export default function RenameFileModal({ isOpen, onClose, currentPath, onSave }
     if (oldExt !== nextExt) {
       setAlertConfig({
         isOpen: true,
-        message: `Extension change not allowed! Your file must end with ${oldExt ? `.${oldExt}` : "no extension"}.`,
-        type: "error"
+        message: `Extension change not allowed! Your file must end with ${
+          oldExt ? `.${oldExt}` : "no extension"
+        }.`,
+        type: "error",
       });
       return;
     }
 
     if (newPath.trim() === "") {
-      setAlertConfig({ isOpen: true, message: "Path cannot be empty!", type: "error" });
+      setAlertConfig({
+        isOpen: true,
+        message: "Path cannot be empty!",
+        type: "error",
+      });
       return;
     }
 
@@ -49,43 +61,80 @@ export default function RenameFileModal({ isOpen, onClose, currentPath, onSave }
     onClose();
   };
 
+  const handleClose = () => {
+    setNewPath(currentPath);
+    onClose();
+  };
+
   return (
     <>
-      <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-[#1A1A1A]/60 backdrop-blur-sm animate-in fade-in duration-200">
-        <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-[#d6d1c4] overflow-hidden">
-          
-          <div className="flex items-center justify-between p-4 border-b border-[rgba(181,172,138,0.25)] bg-[#F5F1EC]">
-            <h3 className="text-[15px] font-semibold text-[#1A1A1A]">Edit File Path</h3>
-            <button onClick={onClose} className="text-[#8a8a8a] hover:text-[#1A1A1A] transition-colors">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={handleClose}
+            className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 1.15, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 320 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-[300px] bg-[#F2F2F7]/95 backdrop-blur-xl rounded-[14px] overflow-hidden shadow-2xl"
+            >
+              {/* Content */}
+              <div className="px-4 pt-5 pb-4">
+                <h3 className="text-[17px] font-semibold text-black leading-tight tracking-tight text-center">
+                  Edit File Path
+                </h3>
+                <p className="text-[13px] text-black/85 leading-snug mt-1.5 text-center">
+                  Folders will be automatically created if they don't exist.
+                </p>
 
-          <div className="p-4 flex flex-col gap-2">
-            <label className="text-[12px] font-semibold text-[#8a8a8a]">Full Path</label>
-            <input
-              type="text"
-              value={newPath}
-              onChange={(e) => setNewPath(e.target.value)}
-              className="w-full p-2.5 bg-white border border-[#d6d1c4] rounded-xl text-[13px] font-mono text-[#1A1A1A] outline-none focus:border-[#6D001A] focus:ring-1 focus:ring-[#6D001A] transition-all"
-              placeholder="e.g. src/app/main.py"
-            />
-            <p className="text-[11px] text-[#8a8a8a] mt-1">Folders will be automatically created if they don't exist.</p>
-          </div>
+                <input
+                  type="text"
+                  value={newPath}
+                  onChange={(e) => setNewPath(e.target.value)}
+                  autoFocus
+                  autoComplete="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  className="mt-4 w-full px-3 py-2.5 bg-white rounded-[10px] text-[13px] font-mono text-black outline-none focus:ring-2 focus:ring-[#007AFF]/40 transition-all"
+                  placeholder="e.g. src/app/main.py"
+                />
+              </div>
 
-          <div className="flex items-center justify-end gap-2 p-4 pt-2">
-            <button onClick={onClose} className="py-2 px-4 text-[13px] font-semibold text-[#4A4A4A] bg-[#F5F1EC] rounded-xl hover:bg-[#e6e0d4] transition-all">
-              Cancel
-            </button>
-            <button onClick={handleSave} className="py-2 px-4 text-[13px] font-semibold text-white bg-gradient-to-br from-[#6D001A] to-[#8B0022] rounded-xl hover:-translate-y-px hover:shadow-md transition-all">
-              Update Path
-            </button>
-          </div>
+              {/* Divider */}
+              <div className="h-[0.5px] bg-[#3C3C43]/30" />
 
-        </div>
-      </div>
+              {/* Buttons */}
+              <div className="flex relative">
+                <button
+                  onClick={handleClose}
+                  className="flex-1 py-3 text-[17px] text-[#007AFF] active:bg-black/5 transition-colors"
+                >
+                  Cancel
+                </button>
 
-      {/* Reusing existing AlertModal for errors */}
+                <div className="w-[0.5px] bg-[#3C3C43]/30" />
+
+                <button
+                  onClick={handleSave}
+                  className="flex-1 py-3 text-[17px] font-semibold text-[#007AFF] active:bg-black/5 transition-colors"
+                >
+                  Update
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Reuse existing iOS AlertModal for validation errors */}
       <AlertModal
         isOpen={alertConfig.isOpen}
         message={alertConfig.message}

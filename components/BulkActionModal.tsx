@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { X, CopyCheck } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 import { getFileContent } from "@/actions/github";
 import { decodeBase64 } from "@/lib/utils";
 
@@ -15,39 +16,60 @@ interface BulkActionModalProps {
   setTreeData: (data: any) => void;
 }
 
-export default function BulkActionModal({ isOpen, onClose, owner, repo, branch, treeData, setTreeData }: BulkActionModalProps) {
+export default function BulkActionModal({
+  isOpen,
+  onClose,
+  owner,
+  repo,
+  branch,
+  treeData,
+  setTreeData,
+}: BulkActionModalProps) {
   const [mode, setMode] = useState<"copy" | "create">("copy");
   const [textInput, setTextInput] = useState("");
   const [status, setStatus] = useState({ message: "", type: "" });
   const [loading, setLoading] = useState(false);
 
-  if (!isOpen) return null;
+  const handleClose = () => {
+    if (loading) return;
+    setTextInput("");
+    setStatus({ message: "", type: "" });
+    onClose();
+  };
 
   const executeAction = async () => {
-    const paths = textInput.split('\n').map(p => p.trim().replace(/^\/+/, '')).filter(p => p.length > 0);
-    
+    const paths = textInput
+      .split("\n")
+      .map((p) => p.trim().replace(/^\/+/, ""))
+      .filter((p) => p.length > 0);
+
     if (paths.length === 0) {
-      setStatus({ message: "Koi file path nahi dala!", type: "error" });
+      setStatus({ message: "No file paths provided!", type: "error" });
       return;
     }
 
     setLoading(true);
     setStatus({ message: "Processing...", type: "info" });
 
-    if (mode === 'create') {
-      // Create new dummy nodes in the tree state
-      const newTree = JSON.parse(JSON.stringify(treeData)); // Deep copy
+    if (mode === "create") {
+      const newTree = JSON.parse(JSON.stringify(treeData));
       let addedCount = 0;
 
-      paths.forEach(fullPath => {
+      paths.forEach((fullPath) => {
         const parts = fullPath.split("/");
         let current = newTree;
         parts.forEach((part, i) => {
           if (!current[part]) {
             current[part] = {
-              _info: i === parts.length - 1 
-                ? { path: fullPath, type: "blob", sha: "dummy_" + Date.now() + "_" + i, size: 0 } 
-                : { type: "tree", path: parts.slice(0, i + 1).join("/") }
+              _info:
+                i === parts.length - 1
+                  ? {
+                      path: fullPath,
+                      type: "blob",
+                      sha: "dummy_" + Date.now() + "_" + i,
+                      size: 0,
+                    }
+                  : { type: "tree", path: parts.slice(0, i + 1).join("/") },
             };
             if (i === parts.length - 1) addedCount++;
           }
@@ -56,16 +78,14 @@ export default function BulkActionModal({ isOpen, onClose, owner, repo, branch, 
       });
 
       if (addedCount === 0) {
-        setStatus({ message: "Saari files pehle se exist karti hain. (Ignored)", type: "warning" });
+        setStatus({ message: "All files already exist. (Ignored)", type: "warning" });
       } else {
-        setTreeData(newTree); // Update UI Tree immediately
-        setStatus({ message: `✅ ${addedCount} nayi files add ho gayi!`, type: "success" });
+        setTreeData(newTree);
+        setStatus({ message: `✅ ${addedCount} new files added!`, type: "success" });
         setTimeout(onClose, 1500);
       }
       setLoading(false);
-    } 
-    
-    else if (mode === 'copy') {
+    } else if (mode === "copy") {
       try {
         let finalText = "";
         let successCount = 0;
@@ -94,67 +114,119 @@ export default function BulkActionModal({ isOpen, onClose, owner, repo, branch, 
     }
   };
 
+  const statusColor =
+    status.type === "error"
+      ? "text-[#FF3B30]"
+      : status.type === "success"
+      ? "text-[#34C759]"
+      : status.type === "warning"
+      ? "text-[#FF9500]"
+      : "text-[#8E8E93]";
+
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-[#1A1A1A]/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl w-full max-w-lg shadow-[0_12px_32px_rgba(0,0,0,0.12)] border border-[#d6d1c4] overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-[rgba(181,172,138,0.25)] bg-[#F5F1EC]">
-          <div className="flex items-center gap-2">
-            <CopyCheck className="w-4 h-4 text-[#1A1A1A]" />
-            <h3 className="text-[15px] font-semibold text-[#1A1A1A]">Bulk Actions</h3>
-          </div>
-          <button onClick={onClose} disabled={loading} className="text-[#8a8a8a] hover:text-[#1A1A1A] transition-colors disabled:opacity-50">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="p-4 flex flex-col gap-3 flex-1 overflow-y-auto">
-          
-          {/* Toggle */}
-          <div className="flex bg-[#F5F1EC] rounded-lg p-1">
-            <button 
-              onClick={() => setMode("copy")}
-              className={`flex-1 py-1.5 text-[13px] font-semibold rounded-md transition-all ${mode === 'copy' ? 'bg-white shadow-sm text-[#6D001A]' : 'text-[#8a8a8a] hover:text-[#4A4A4A]'}`}
-            >
-              Copy Files
-            </button>
-            <button 
-              onClick={() => setMode("create")}
-              className={`flex-1 py-1.5 text-[13px] font-semibold rounded-md transition-all ${mode === 'create' ? 'bg-white shadow-sm text-[#6D001A]' : 'text-[#8a8a8a] hover:text-[#4A4A4A]'}`}
-            >
-              Create Files
-            </button>
-          </div>
-
-          <p className="text-[12px] text-[#8a8a8a] leading-tight">
-            File paths yahan paste karein (ek line mein ek path).
-          </p>
-
-          <textarea 
-            value={textInput}
-            onChange={(e) => setTextInput(e.target.value)}
-            disabled={loading}
-            className="w-full min-h-[160px] p-3 bg-white border border-[#d6d1c4] rounded-xl text-[13px] font-mono text-[#1A1A1A] outline-none focus:border-[#6D001A] focus:ring-2 focus:ring-[#6D001A]/10 transition-all resize-y disabled:opacity-50"
-            placeholder="lib/utils.ts&#10;package.json&#10;app/page.tsx"
-          />
-
-          {/* Status Message */}
-          <div className={`text-[12px] font-medium min-h-[18px] ${status.type === 'error' ? 'text-[#ff3b30]' : status.type === 'success' ? 'text-[#34c759]' : status.type === 'warning' ? 'text-[#B5AC8A]' : 'text-[#1A1A1A]'}`}>
-            {status.message}
-          </div>
-
-          <button
-            onClick={executeAction}
-            disabled={loading}
-            className="w-full mt-2 py-2.5 text-[14px] font-semibold text-white bg-gradient-to-br from-[#6D001A] to-[#8B0022] rounded-xl hover:-translate-y-px hover:shadow-md transition-all disabled:opacity-50"
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={handleClose}
+          className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm px-0 sm:px-4"
+        >
+          <motion.div
+            initial={{ y: "100%", opacity: 0, scale: 0.98 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: "100%", opacity: 0, scale: 0.98 }}
+            transition={{ type: "spring", damping: 30, stiffness: 320 }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full sm:max-w-[480px] bg-[#F2F2F7] rounded-t-[20px] sm:rounded-[20px] overflow-hidden shadow-2xl flex flex-col max-h-[85vh]"
           >
-            {loading ? "Processing..." : mode === 'copy' ? "Fetch & Copy" : "Create Files"}
-          </button>
-        </div>
+            {/* Grabber */}
+            <div className="sm:hidden flex justify-center pt-2 pb-1">
+              <div className="w-9 h-[5px] rounded-full bg-black/20" />
+            </div>
 
-      </div>
-    </div>
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 pt-3 pb-3">
+              <h2 className="text-[16px] font-semibold text-black tracking-tight">
+                Bulk Actions
+              </h2>
+              <button
+                onClick={handleClose}
+                disabled={loading}
+                className="w-7 h-7 flex items-center justify-center rounded-full bg-black/5 text-[#8E8E93] active:bg-black/10 transition-colors disabled:opacity-40"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" strokeWidth={2.5} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto px-4 pb-4 flex flex-col gap-3">
+              {/* iOS Segmented Control */}
+              <div className="bg-[#767680]/[0.12] rounded-[9px] p-[3px] flex gap-0.5">
+                <button
+                  onClick={() => setMode("copy")}
+                  className={`flex-1 py-[7px] text-[13px] rounded-[7px] transition-all duration-150 ${
+                    mode === "copy"
+                      ? "bg-white text-black font-semibold shadow-[0_1px_3px_rgba(0,0,0,0.08)]"
+                      : "text-black/60 font-medium"
+                  }`}
+                >
+                  Copy Files
+                </button>
+                <button
+                  onClick={() => setMode("create")}
+                  className={`flex-1 py-[7px] text-[13px] rounded-[7px] transition-all duration-150 ${
+                    mode === "create"
+                      ? "bg-white text-black font-semibold shadow-[0_1px_3px_rgba(0,0,0,0.08)]"
+                      : "text-black/60 font-medium"
+                  }`}
+                >
+                  Create Files
+                </button>
+              </div>
+
+              <p className="text-[13px] text-[#8E8E93] leading-snug px-1">
+                Paste file paths below, one per line.
+              </p>
+
+              <textarea
+                value={textInput}
+                onChange={(e) => setTextInput(e.target.value)}
+                disabled={loading}
+                className="w-full min-h-[180px] p-3 bg-white rounded-[10px] text-[13px] font-mono text-black outline-none focus:ring-2 focus:ring-[#007AFF]/40 transition-all resize-y disabled:opacity-50"
+                placeholder={"lib/utils.ts\npackage.json\napp/page.tsx"}
+              />
+
+              {/* Status */}
+              <div className={`text-[12px] font-medium min-h-[18px] px-1 ${statusColor}`}>
+                {status.message}
+              </div>
+
+              {/* Action Button */}
+              <button
+                onClick={executeAction}
+                disabled={loading}
+                className="w-full py-3.5 bg-[#007AFF] active:bg-[#0062CC] text-white text-[15px] font-semibold rounded-2xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {loading && (
+                  <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2.5" strokeOpacity="0.3" />
+                    <path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
+                  </svg>
+                )}
+                {loading
+                  ? "Processing..."
+                  : mode === "copy"
+                  ? "Fetch & Copy"
+                  : "Create Files"}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
