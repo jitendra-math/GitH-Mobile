@@ -2,24 +2,29 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
-// 1. Custom local font setup karo
+// Local SF fallback font — used on browsers that don't have SF Pro.
+// NOTE: Only regular weight is included. For best bold rendering on
+// non-Apple devices, add SFUIText-Medium + SFUIText-Semibold woff2 files.
 const sfUiText = localFont({
-  src: "./fonts/SFUIText-Regular.woff2", // Ensure karo ki path sahi ho
-  variable: "--font-sf-ui", // Tailwind ke liye variable
+  src: "./fonts/SFUIText-Regular.woff2",
+  variable: "--font-sf-ui",
   weight: "400",
   style: "normal",
   display: "swap",
 });
 
-// Setup viewport and theme color for mobile browsers
 export const viewport: Viewport = {
-  themeColor: "#F5F1EC",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F2F2F7" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
 };
 
-// Setup manifest and apple-specific PWA tags
 export const metadata: Metadata = {
   title: "GitHub Manager",
   description: "Manage your GitHub repositories using a PAT",
@@ -28,6 +33,9 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "default",
     title: "GH Manager",
+  },
+  formatDetection: {
+    telephone: false,
   },
   icons: {
     icon: "/icon-512x512.png",
@@ -42,8 +50,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      {/* 2. Variable aur font-sans dono lagao body par */}
-      <body className={`${sfUiText.variable} font-sans bg-gray-50 text-gray-900 min-h-screen`}>
+      <body
+        className={`${sfUiText.variable} font-sans bg-[#F2F2F7] text-black min-h-screen antialiased`}
+      >
         {children}
       </body>
     </html>
