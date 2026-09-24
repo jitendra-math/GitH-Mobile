@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { Folder, FolderOpen, FileText } from "lucide-react";
 import { formatSize, encodeBase64, decodeBase64 } from "@/lib/utils";
 import { getFileContent } from "@/actions/github";
@@ -26,7 +27,7 @@ export default function TreeNode({
   const [confirmConfig, setConfirmConfig] = useState<{
     isOpen: boolean;
     title: string;
-    message: string;
+    message: ReactNode;
     confirmText: string;
     onConfirm: () => void;
   }>({
@@ -44,7 +45,7 @@ export default function TreeNode({
 
   const showConfirm = (
     title: string,
-    message: string,
+    message: ReactNode,
     confirmText: string,
     onConfirm: () => void
   ) => setConfirmConfig({ isOpen: true, title, message, confirmText, onConfirm });
@@ -110,7 +111,13 @@ export default function TreeNode({
 
       showConfirm(
         "Replace File?",
-        `Replace "${info.path}" with the content from your clipboard?`,
+        <>
+          Replace{" "}
+          <span className="text-[#007AFF] font-medium break-all">
+            {info.path}
+          </span>{" "}
+          with the content from your clipboard?
+        </>,
         "Replace",
         () => {
           const oldSize = info.size || 0;
@@ -153,7 +160,12 @@ export default function TreeNode({
   const handleDelete = () => {
     showConfirm(
       "Delete File?",
-      `"${info.path}" will be added to the commit queue for deletion.`,
+      <>
+        <span className="text-[#007AFF] font-medium break-all">
+          {info.path}
+        </span>{" "}
+        will be added to the commit queue for deletion.
+      </>,
       "Delete",
       () => {
         const oldSize = info.size || 0;
@@ -189,9 +201,15 @@ export default function TreeNode({
               className="flex items-center gap-2.5 flex-1 min-w-0 text-left"
             >
               {isOpen ? (
-                <FolderOpen className="w-[18px] h-[18px] text-[#FF9500] shrink-0" strokeWidth={2.2} />
+                <FolderOpen
+                  className="w-[18px] h-[18px] text-[#FF9500] shrink-0"
+                  strokeWidth={2.2}
+                />
               ) : (
-                <Folder className="w-[18px] h-[18px] text-[#FF9500] shrink-0" strokeWidth={2.2} />
+                <Folder
+                  className="w-[18px] h-[18px] text-[#FF9500] shrink-0"
+                  strokeWidth={2.2}
+                />
               )}
               <span className="font-medium text-[14px] truncate text-black">
                 {nodeName}

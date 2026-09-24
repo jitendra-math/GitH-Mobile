@@ -269,31 +269,6 @@ export default function EditModal() {
 
                 <div className="w-px h-4 bg-[#C6C6C8]/60 mx-0.5 shrink-0" />
 
-                {/* Edit Mode Toggle */}
-                {view === "tree" && (
-                  <button
-                    onClick={toggleEditMode}
-                    className={`h-8 px-3 flex items-center gap-1.5 rounded-lg transition-colors text-[12px] font-semibold shrink-0 ${
-                      isEditMode
-                        ? "bg-[#34C759] active:bg-[#2AA34A] text-white"
-                        : "bg-white border border-[#C6C6C8]/60 text-black active:bg-[#E5E5EA]"
-                    }`}
-                    title="Toggle Edit Mode"
-                  >
-                    <Pencil className="w-3.5 h-3.5" strokeWidth={2.5} />
-                    <span>Edit Mode {isEditMode ? "ON" : "OFF"}</span>
-                  </button>
-                )}
-
-                {/* Upload */}
-                <button
-                  onClick={() => setIsFileUploadModalOpen(true)}
-                  className="h-8 px-3 flex items-center gap-1.5 rounded-lg bg-white border border-[#C6C6C8]/60 text-black active:bg-[#E5E5EA] transition-colors text-[12px] font-semibold shrink-0"
-                >
-                  <UploadCloud className="w-3.5 h-3.5" strokeWidth={2.5} />
-                  <span>Upload</span>
-                </button>
-
                 {/* Bulk Actions */}
                 <button
                   onClick={() => setIsBulkModalOpen(true)}
@@ -319,6 +294,31 @@ export default function EditModal() {
                   )}
                   <span>{copiedStructure ? "Copied!" : "Copy Structure"}</span>
                 </button>
+
+                {/* Upload */}
+                <button
+                  onClick={() => setIsFileUploadModalOpen(true)}
+                  className="h-8 px-3 flex items-center gap-1.5 rounded-lg bg-white border border-[#C6C6C8]/60 text-black active:bg-[#E5E5EA] transition-colors text-[12px] font-semibold shrink-0"
+                >
+                  <UploadCloud className="w-3.5 h-3.5" strokeWidth={2.5} />
+                  <span>Upload</span>
+                </button>
+
+                {/* Edit Mode Toggle */}
+                {view === "tree" && (
+                  <button
+                    onClick={toggleEditMode}
+                    className={`h-8 px-3 flex items-center gap-1.5 rounded-lg transition-colors text-[12px] font-semibold shrink-0 ${
+                      isEditMode
+                        ? "bg-[#34C759] active:bg-[#2AA34A] text-white"
+                        : "bg-white border border-[#C6C6C8]/60 text-black active:bg-[#E5E5EA]"
+                    }`}
+                    title="Toggle Edit Mode"
+                  >
+                    <Pencil className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    <span>Edit Mode {isEditMode ? "ON" : "OFF"}</span>
+                  </button>
+                )}
               </div>
             </div>
 
