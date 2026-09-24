@@ -139,7 +139,7 @@ export default function DangerConfirmModal({
                 autoCapitalize="off"
                 autoCorrect="off"
                 spellCheck={false}
-                className="mt-3 w-full px-3 py-2.5 bg-white rounded-[10px] text-[14px] font-mono text-black tracking-[0.15em] text-center outline-none focus:ring-2 focus:ring-[#007AFF]/40 transition-all disabled:opacity-50"
+                className="mt-3 w-full px-3 py-2.5 bg-white rounded-[10px] text-[14px] font-mono text-black text-center outline-none focus:ring-2 focus:ring-[#007AFF]/40 transition-all disabled:opacity-50"
               />
             </div>
 
