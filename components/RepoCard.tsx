@@ -88,6 +88,9 @@ export default function RepoCard({ repo }: { repo: any }) {
   const language = repo.language || null;
   const langColor = language ? languageColors[language] || languageColors.default : null;
 
+  // Full repo path — used for delete confirmation
+  const fullRepoPath = `${repo.owner.login}/${repo.name}`;
+
   return (
     <>
       <div className="flex flex-col bg-white rounded-2xl overflow-hidden shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-200 hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)]">
@@ -199,9 +202,10 @@ export default function RepoCard({ repo }: { repo: any }) {
         isOpen={isDeleteModalOpen}
         title="Delete Repository"
         description="This action is permanent and cannot be undone. The following repository will be deleted:"
-        highlight={repo.name}
-        instruction="Type the repository name below to confirm"
-        expectedValue={repo.name}
+        highlight={fullRepoPath}
+        instructionPrefix="Type"
+        instructionSuffix="below to confirm"
+        expectedValue={fullRepoPath}
         caseSensitive={true}
         variant="destructive"
         confirmText="Delete"

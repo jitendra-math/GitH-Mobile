@@ -12,7 +12,8 @@ interface DangerConfirmModalProps {
   description: string;
   highlight: string;
   highlightItalic?: boolean;
-  instruction: string;
+  instructionPrefix?: string;
+  instructionSuffix?: string;
   expectedValue: string;
   placeholder?: string;
   caseSensitive?: boolean;
@@ -34,7 +35,8 @@ export default function DangerConfirmModal({
   description,
   highlight,
   highlightItalic = false,
-  instruction,
+  instructionPrefix = "Type",
+  instructionSuffix = "below to confirm",
   expectedValue,
   placeholder,
   caseSensitive = true,
@@ -117,15 +119,14 @@ export default function DangerConfirmModal({
                 "{highlight}"
               </p>
 
-              {/* Instruction */}
+              {/* Instruction with inline value */}
               <p className="text-[12px] text-[#8E8E93] mt-3 text-center leading-snug">
-                {instruction}
+                {instructionPrefix}{" "}
+                <span className="text-[#007AFF] font-mono font-medium break-all">
+                  {expectedValue}
+                </span>{" "}
+                {instructionSuffix}
               </p>
-
-              {/* Expected value display */}
-              <div className="mt-2 w-full px-3 py-2 bg-white rounded-lg text-[14px] font-mono font-semibold text-black tracking-[0.15em] text-center select-all">
-                {expectedValue}
-              </div>
 
               {/* Input */}
               <input
@@ -138,7 +139,7 @@ export default function DangerConfirmModal({
                 autoCapitalize="off"
                 autoCorrect="off"
                 spellCheck={false}
-                className="mt-2 w-full px-3 py-2.5 bg-white rounded-[10px] text-[14px] font-mono text-black tracking-[0.15em] text-center outline-none focus:ring-2 focus:ring-[#007AFF]/40 transition-all disabled:opacity-50"
+                className="mt-3 w-full px-3 py-2.5 bg-white rounded-[10px] text-[14px] font-mono text-black tracking-[0.15em] text-center outline-none focus:ring-2 focus:ring-[#007AFF]/40 transition-all disabled:opacity-50"
               />
             </div>
 

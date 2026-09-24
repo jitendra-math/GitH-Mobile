@@ -550,7 +550,8 @@ export default function EditModal() {
             description="Your repository will revert to this commit:"
             highlight={rollbackConfig.msg}
             highlightItalic={true}
-            instruction="Type the commit ID below to confirm"
+            instructionPrefix="Type"
+            instructionSuffix="below to confirm"
             expectedValue={rollbackConfig.sha.substring(0, 7)}
             caseSensitive={false}
             variant="warning"
