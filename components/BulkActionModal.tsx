@@ -81,7 +81,7 @@ export default function BulkActionModal({
         setStatus({ message: "All files already exist. (Ignored)", type: "warning" });
       } else {
         setTreeData(newTree);
-        setStatus({ message: `✅ ${addedCount} new files added!`, type: "success" });
+        setStatus({ message: `✅ ${addedCount} files added! Check "Review Files".`, type: "success" });
         setTimeout(onClose, 1500);
       }
       setLoading(false);

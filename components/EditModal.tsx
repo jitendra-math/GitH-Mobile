@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   UploadCloud,
   Pencil,
+  FileWarning,
 } from "lucide-react";
 import { useEditStore } from "@/store/useEditStore";
 import {
@@ -19,13 +20,14 @@ import {
   fetchCommitHistory,
   rollbackToCommit,
 } from "@/actions/github";
-import { generateTreeText } from "@/lib/utils";
+import { generateTreeText, getPendingReviewFiles } from "@/lib/utils";
 import TreeNode from "./TreeNode";
 import BulkActionModal from "./BulkActionModal";
 import AlertModal from "./AlertModal";
 import DangerConfirmModal from "./DangerConfirmModal";
 import FileUploadModal from "./FileUploadModal";
 import CodeEditorModal from "./CodeEditorModal";
+import ReviewFilesModal from "./ReviewFilesModal";
 
 export default function EditModal() {
   const {
@@ -49,6 +51,7 @@ export default function EditModal() {
   const [committing, setCommitting] = useState(false);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [isFileUploadModalOpen, setIsFileUploadModalOpen] = useState(false);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [copiedStructure, setCopiedStructure] = useState(false);
 
   const [alertConfig, setAlertConfig] = useState({
@@ -62,6 +65,8 @@ export default function EditModal() {
     msg: "",
   });
   const [isRollingBack, setIsRollingBack] = useState(false);
+
+  const pendingReviewFiles = getPendingReviewFiles(treeData, queue);
 
   const showAlert = (message: string, type: any = "info") => {
     setAlertConfig({ isOpen: true, message, type });
@@ -267,6 +272,17 @@ export default function EditModal() {
                 )}
 
                 <div className="w-px h-4 bg-[#C6C6C8]/60 mx-0.5 shrink-0" />
+
+                {/* Review New Files Button (Only shows if there are pending files) */}
+                {view === "tree" && pendingReviewFiles.length > 0 && (
+                  <button
+                    onClick={() => setIsReviewModalOpen(true)}
+                    className="h-8 px-3 flex items-center gap-1.5 rounded-lg bg-[#FF9500] active:bg-[#CC7A00] text-white transition-colors text-[12px] font-semibold shrink-0 animate-pulse"
+                  >
+                    <FileWarning className="w-3.5 h-3.5" strokeWidth={2.5} />
+                    <span>Review Files ({pendingReviewFiles.length})</span>
+                  </button>
+                )}
 
                 {/* Bulk Actions */}
                 <button
@@ -535,6 +551,12 @@ export default function EditModal() {
             owner={owner}
             repo={repo}
             branch={branch}
+            treeData={treeData}
+            setTreeData={setTreeData}
+          />
+          <ReviewFilesModal 
+            isOpen={isReviewModalOpen}
+            onClose={() => setIsReviewModalOpen(false)}
             treeData={treeData}
             setTreeData={setTreeData}
           />
