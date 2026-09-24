@@ -23,7 +23,7 @@ import { generateTreeText } from "@/lib/utils";
 import TreeNode from "./TreeNode";
 import BulkActionModal from "./BulkActionModal";
 import AlertModal from "./AlertModal";
-import RollbackPromptModal from "./RollbackPromptModal";
+import DangerConfirmModal from "./DangerConfirmModal";
 import FileUploadModal from "./FileUploadModal";
 import CodeEditorModal from "./CodeEditorModal";
 
@@ -188,7 +188,6 @@ export default function EditModal() {
     }
   };
 
-  // Root-level keys sorted: folders first, then files, alphabetical within each group
   const rootKeys = treeData
     ? Object.keys(treeData)
         .filter((k) => k !== "_info")
@@ -545,15 +544,22 @@ export default function EditModal() {
             type={alertConfig.type}
             onClose={() => setAlertConfig({ ...alertConfig, isOpen: false })}
           />
-          <RollbackPromptModal
+          <DangerConfirmModal
             isOpen={rollbackConfig.isOpen}
-            commitSha={rollbackConfig.sha}
-            commitMsg={rollbackConfig.msg}
+            title="Confirm Rollback"
+            description="Your repository will revert to this commit:"
+            highlight={rollbackConfig.msg}
+            highlightItalic={true}
+            instruction="Type the commit ID below to confirm"
+            expectedValue={rollbackConfig.sha.substring(0, 7)}
+            caseSensitive={false}
+            variant="warning"
+            confirmText="Rollback"
             loading={isRollingBack}
             onCancel={() =>
               setRollbackConfig({ ...rollbackConfig, isOpen: false })
             }
-            onConfirm={executeRollback}
+            onConfirm={() => executeRollback(rollbackConfig.sha)}
           />
         </>
       )}

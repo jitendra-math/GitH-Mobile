@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { deleteRepo, fetchBranches } from "@/actions/github";
 import { useEditStore } from "@/store/useEditStore";
-import DeleteConfirmModal from "./DeleteConfirmModal";
+import DangerConfirmModal from "./DangerConfirmModal";
 import RepoInfoModal from "./RepoInfoModal";
 
 const languageColors: Record<string, string> = {
@@ -195,9 +195,16 @@ export default function RepoCard({ repo }: { repo: any }) {
       />
 
       {/* Delete Confirm */}
-      <DeleteConfirmModal
+      <DangerConfirmModal
         isOpen={isDeleteModalOpen}
-        repoName={repo.name}
+        title="Delete Repository"
+        description="This action is permanent and cannot be undone. The following repository will be deleted:"
+        highlight={repo.name}
+        instruction="Type the repository name below to confirm"
+        expectedValue={repo.name}
+        caseSensitive={true}
+        variant="destructive"
+        confirmText="Delete"
         loading={isDeleting}
         onCancel={() => setIsDeleteModalOpen(false)}
         onConfirm={executeDelete}
