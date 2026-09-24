@@ -34,10 +34,24 @@ export function encodeBase64(text: string) {
   }
 }
 
+// Sort tree keys: folders first, then files, alphabetical within each group.
+// Used by both the visual tree (EditModal) and text tree (generateTreeText).
+export function sortTreeKeys(node: any): string[] {
+  return Object.keys(node)
+    .filter((k) => k !== "_info")
+    .sort((a, b) => {
+      const isDirA = node[a]?._info?.type === "tree";
+      const isDirB = node[b]?._info?.type === "tree";
+      if (isDirA && !isDirB) return -1;
+      if (!isDirA && isDirB) return 1;
+      return a.localeCompare(b);
+    });
+}
+
 // Generate ASCII Tree Structure String
 export function generateTreeText(node: any, prefix = ""): string {
   let text = "";
-  const keys = Object.keys(node).filter(k => k !== "_info").sort();
+  const keys = sortTreeKeys(node);
   keys.forEach((key, index) => {
     const child = node[key];
     const isLast = index === keys.length - 1;

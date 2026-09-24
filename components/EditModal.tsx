@@ -188,6 +188,19 @@ export default function EditModal() {
     }
   };
 
+  // Root-level keys sorted: folders first, then files, alphabetical within each group
+  const rootKeys = treeData
+    ? Object.keys(treeData)
+        .filter((k) => k !== "_info")
+        .sort((a, b) => {
+          const isDirA = treeData[a]._info?.type === "tree";
+          const isDirB = treeData[b]._info?.type === "tree";
+          if (isDirA && !isDirB) return -1;
+          if (!isDirA && isDirB) return 1;
+          return a.localeCompare(b);
+        })
+    : [];
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -340,15 +353,13 @@ export default function EditModal() {
               ) : view === "tree" ? (
                 treeData ? (
                   <ul className="text-[14px] text-black">
-                    {Object.keys(treeData)
-                      .filter((k) => k !== "_info")
-                      .map((key) => (
-                        <TreeNode
-                          key={key}
-                          nodeName={key}
-                          nodeData={treeData[key]}
-                        />
-                      ))}
+                    {rootKeys.map((key) => (
+                      <TreeNode
+                        key={key}
+                        nodeName={key}
+                        nodeData={treeData[key]}
+                      />
+                    ))}
                   </ul>
                 ) : null
               ) : (
