@@ -1,15 +1,17 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
   ExternalLink,
-  Star,
-  GitFork,
   Globe,
   Lock,
   Code2,
+  Calendar,
+  GitCommit,
 } from "lucide-react";
+import { fetchCommitHistory } from "@/actions/github";
 
 const languageColors: Record<string, string> = {
   JavaScript: "#f1e05a",
@@ -41,6 +43,31 @@ interface RepoInfoModalProps {
 }
 
 export default function RepoInfoModal({ isOpen, repo, onClose }: RepoInfoModalProps) {
+  const [lastCommit, setLastCommit] = useState<{
+    sha: string;
+    date: string;
+  } | null>(null);
+  const [loadingCommit, setLoadingCommit] = useState(false);
+
+  useEffect(() => {
+    if (isOpen && repo) {
+      setLoadingCommit(true);
+      setLastCommit(null);
+      const branch = repo.default_branch || "main";
+      fetchCommitHistory(repo.owner.login, repo.name, branch)
+        .then((commits) => {
+          if (commits && commits[0]) {
+            setLastCommit({
+              sha: commits[0].sha.substring(0, 7),
+              date: commits[0].commit.author.date,
+            });
+          }
+        })
+        .catch((err) => console.error("Failed to fetch last commit:", err))
+        .finally(() => setLoadingCommit(false));
+    }
+  }, [isOpen, repo]);
+
   if (!repo) return null;
 
   const isPrivate = repo.private;
@@ -52,11 +79,28 @@ export default function RepoInfoModal({ isOpen, repo, onClose }: RepoInfoModalPr
     onClose();
   };
 
-  const formatCount = (n: number) => {
-    if (!n) return "0";
-    if (n < 1000) return String(n);
-    if (n < 1000000) return `${(n / 1000).toFixed(1)}k`;
-    return `${(n / 1000000).toFixed(1)}M`;
+  const formatDate = (iso?: string) => {
+    if (!iso) return "—";
+    return new Date(iso).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  const timeAgo = (iso?: string) => {
+    if (!iso) return "—";
+    const diff = Date.now() - new Date(iso).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days < 30) return `${days}d ago`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months}mo ago`;
+    return `${Math.floor(months / 12)}y ago`;
   };
 
   return (
@@ -162,23 +206,37 @@ export default function RepoInfoModal({ isOpen, repo, onClose }: RepoInfoModalPr
                   iconBg={isPrivate ? "#FF9500" : "#34C759"}
                   label="Visibility"
                   value={isPrivate ? "Private" : "Public"}
-                  showDivider={false}
+                  showDivider={true}
                 />
-              </div>
 
-              {/* Stats Card */}
-              <div className="bg-white rounded-2xl overflow-hidden grid grid-cols-2 divide-x divide-[#C6C6C8]/30 mb-3">
-                <StatCell
-                  icon={<Star className="w-4 h-4" />}
-                  iconBg="#FFCC00"
-                  label="Stars"
-                  value={formatCount(repo.stargazers_count ?? 0)}
+                <InfoRow
+                  icon={<Calendar className="w-4 h-4" />}
+                  iconBg="#8E8E93"
+                  label="Created"
+                  value={formatDate(repo.created_at)}
+                  showDivider={true}
                 />
-                <StatCell
-                  icon={<GitFork className="w-4 h-4" />}
+
+                <InfoRow
+                  icon={<GitCommit className="w-4 h-4" />}
                   iconBg="#AF52DE"
-                  label="Forks"
-                  value={formatCount(repo.forks_count ?? 0)}
+                  label="Last Commit"
+                  value={
+                    loadingCommit ? (
+                      <span className="text-[#8E8E93]">Loading…</span>
+                    ) : lastCommit ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="font-mono font-semibold text-black">
+                          {lastCommit.sha}
+                        </span>
+                        <span className="text-[#C6C6C8]">·</span>
+                        <span>{timeAgo(lastCommit.date)}</span>
+                      </span>
+                    ) : (
+                      <span className="text-[#8E8E93]">—</span>
+                    )
+                  }
+                  showDivider={false}
                 />
               </div>
 
@@ -230,33 +288,6 @@ function InfoRow({
       {showDivider && (
         <div className="absolute bottom-0 left-[56px] right-0 h-[0.5px] bg-[#C6C6C8]/50" />
       )}
-    </div>
-  );
-}
-
-function StatCell({
-  icon,
-  iconBg,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  iconBg: string;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex flex-col items-center justify-center py-4 px-3 text-center">
-      <div
-        className="w-8 h-8 rounded-[8px] flex items-center justify-center text-white mb-2"
-        style={{ backgroundColor: iconBg }}
-      >
-        {icon}
-      </div>
-      <span className="text-[15px] font-semibold text-black leading-none">
-        {value}
-      </span>
-      <span className="text-[11px] text-[#8E8E93] mt-1">{label}</span>
     </div>
   );
 }
