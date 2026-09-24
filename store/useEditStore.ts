@@ -10,7 +10,7 @@ export type QueueItem = {
 
 export type EditingFile = {
   path: string;
-  sha: string | null;
+  sha: string;
   content: string;
   oldSize: number;
 };

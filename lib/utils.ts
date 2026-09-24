@@ -35,6 +35,7 @@ export function encodeBase64(text: string) {
 }
 
 // Sort tree keys: folders first, then files, alphabetical within each group.
+// Used by both the visual tree (EditModal) and text tree (generateTreeText).
 export function sortTreeKeys(node: any): string[] {
   return Object.keys(node)
     .filter((k) => k !== "_info")
@@ -90,26 +91,4 @@ export function fileToBase64(file: File): Promise<string> {
     };
     reader.onerror = (error) => reject(error);
   });
-}
-
-// NEW: Function to extract newly created files (dummy shas) that are not yet in the queue
-export function getPendingReviewFiles(node: any, queue: any[]): any[] {
-  let pending: any[] = [];
-  if (!node) return pending;
-  
-  Object.keys(node).forEach((key) => {
-    if (key === "_info") return;
-    const child = node[key];
-    const info = child._info;
-    
-    if (info?.type === "tree") {
-      pending = pending.concat(getPendingReviewFiles(child, queue));
-    } else if (info?.sha?.startsWith("dummy_")) {
-      const inQueue = queue.some((q: any) => q.path === info.path);
-      if (!inQueue) {
-        pending.push(info);
-      }
-    }
-  });
-  return pending;
 }
