@@ -40,30 +40,30 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshots/dashboard.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
+      "src": "/screenshots/dashboard.jpg",
+      "sizes": "720x1604",
+      "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Manage all your repositories"
     },
     {
-      "src": "/screenshots/repo-info.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
+      "src": "/screenshots/repo-info.jpg",
+      "sizes": "720x1604",
+      "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "View repository details"
     },
     {
-      "src": "/screenshots/edit-modal.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
+      "src": "/screenshots/edit-modal.jpg",
+      "sizes": "720x1604",
+      "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Edit files and commit changes"
     },
     {
-      "src": "/screenshots/upload-files.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
+      "src": "/screenshots/upload-files.jpg",
+      "sizes": "720x1604",
+      "type": "image/jpeg",
       "form_factor": "narrow",
       "label": "Upload files to your repo"
     }
