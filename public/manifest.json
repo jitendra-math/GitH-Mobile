@@ -3,7 +3,7 @@
   "short_name": "GH Manager",
   "description": "Manage your GitHub repositories efficiently",
   "start_url": "/",
-  "display": "fullscreen",
+  "display": "standalone",
   "orientation": "portrait",
   "background_color": "#F2F2F7",
   "theme_color": "#F2F2F7",
