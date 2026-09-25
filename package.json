@@ -1,7 +1,14 @@
 {
-  "name": "github-manager",
+  "name": "gith-mobile",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "browserslist": [
+    "chrome >= 90",
+    "android >= 8"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -11,11 +11,11 @@ export default function Navbar() {
         <div className="flex items-center gap-2 min-w-0">
           <img
             src="/logo.png"
-            alt="Logo"
+            alt="GitH Mobile"
             className="w-7 h-7 rounded-[7px] object-cover shrink-0"
           />
           <span className="text-[17px] font-semibold text-black tracking-tight truncate">
-            GitHub Manager
+            GitH Mobile
           </span>
         </div>
 

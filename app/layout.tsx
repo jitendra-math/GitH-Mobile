@@ -26,20 +26,30 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "GitHub Manager",
-  description: "Manage your GitHub repositories using a PAT",
+  title: "GitH Mobile",
+  description:
+    "An iOS-style GitHub manager for your phone — edit files, commit changes, roll back history, and manage repositories without ever opening a browser.",
   manifest: "/manifest.json",
+  applicationName: "GitH Mobile",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "GH Manager",
+    title: "GitH",
   },
   formatDetection: {
     telephone: false,
+    email: false,
+    address: false,
   },
   icons: {
-    icon: "/icon-512x512.png",
-    apple: "/icon-512x512.png",
+    icon: [
+      { url: "/logo-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/logo-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/logo-192.png", sizes: "192x192", type: "image/png" }],
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
   },
 };
 

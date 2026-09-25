@@ -26,7 +26,7 @@ export default function LoginModal() {
           {/* Content */}
           <div className="px-5 pt-3 pb-6 sm:pt-5 sm:pb-6">
             <h2 className="text-[24px] font-semibold text-black tracking-tight leading-tight">
-              GitHub Manager
+              GitH Mobile
             </h2>
             <p className="text-[13px] text-[#8E8E93] mt-1 leading-snug">
               Sign in to continue

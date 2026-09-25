@@ -1,24 +1,84 @@
 {
-  "name": "GitHub Manager",
-  "short_name": "GH Manager",
-  "description": "Manage your GitHub repositories efficiently",
+  "id": "/",
+  "name": "GitH Mobile",
+  "short_name": "GitH",
+  "description": "An iOS-style GitHub manager for your phone — edit files, commit changes, roll back history, and manage repositories without ever opening a browser.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#F2F2F7",
   "theme_color": "#F2F2F7",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": ["developer", "productivity", "utilities"],
   "icons": [
     {
-      "src": "/icon-512x512.png",
+      "src": "/logo-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/icon-512x512.png",
+      "src": "/logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/logo-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Manage all your repositories"
+    },
+    {
+      "src": "/screenshots/repo-info.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "View repository details"
+    },
+    {
+      "src": "/screenshots/edit-modal.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Edit files and commit changes"
+    },
+    {
+      "src": "/screenshots/upload-files.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Upload files to your repo"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/logo-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }
