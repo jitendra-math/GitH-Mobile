@@ -25,6 +25,7 @@ type LogEntry = {
 const INITIAL_LOGS: LogEntry[] = [
   { type: "info", text: "GitH Mobile Terminal" },
   { type: "info", text: "Available commands: mkdir, mv" },
+  { type: "info", text: "Tip: Paste multiple commands — one per line." },
   { type: "info", text: "" },
 ];
 
@@ -42,11 +43,11 @@ export default function TerminalModal({
   const [logs, setLogs] = useState<LogEntry[]>(INITIAL_LOGS);
   const [loading, setLoading] = useState(false);
   const logEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 350);
+      setTimeout(() => textareaRef.current?.focus(), 350);
     } else {
       setInput("");
       setLogs(INITIAL_LOGS);
@@ -57,6 +58,14 @@ export default function TerminalModal({
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [logs]);
+
+  // Auto-resize textarea based on content
+  useEffect(() => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    ta.style.height = "auto";
+    ta.style.height = Math.min(ta.scrollHeight, 120) + "px";
+  }, [input]);
 
   const addLog = (entry: LogEntry) => setLogs((prev) => [...prev, entry]);
 
@@ -176,7 +185,10 @@ export default function TerminalModal({
       let newSize: number;
 
       if (queueItem?.contentBase64) {
-        addLog({ type: "info", text: `Using pending content for ${cleanSource}…` });
+        addLog({
+          type: "info",
+          text: `Using pending content for ${cleanSource}…`,
+        });
         contentBase64 = queueItem.contentBase64;
         newSize = queueItem.sizeDiff || 0;
       } else {
@@ -281,12 +293,27 @@ export default function TerminalModal({
     addLog({ type: "info", text: "" });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (loading) return;
-    const cmd = input;
+  const handleSubmit = async () => {
+    if (loading || !input.trim()) return;
+    // Split by newline → trim → filter empty → execute sequentially
+    const commands = input
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+
     setInput("");
-    executeCommand(cmd);
+    for (const cmd of commands) {
+      await executeCommand(cmd);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Enter without Shift → submit (run all commands)
+    // Shift+Enter → newline
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
+    }
   };
 
   const handleClear = () => {
@@ -375,39 +402,40 @@ export default function TerminalModal({
               </div>
             </div>
 
-            {/* Input (light) */}
-            <form
-              onSubmit={handleSubmit}
-              className="flex items-center gap-2 px-3 py-2.5 border-t border-[#C6C6C8]/40 bg-[#F2F2F7] shrink-0"
-            >
-              <span className="text-[#34C759] font-mono text-[14px] font-bold shrink-0">
+            {/* Input (light) — textarea for multiline paste support */}
+            <div className="flex items-start gap-2 px-3 py-2.5 border-t border-[#C6C6C8]/40 bg-[#F2F2F7] shrink-0">
+              <span className="text-[#34C759] font-mono text-[14px] font-bold shrink-0 pt-0.5">
                 $
               </span>
-              <input
-                ref={inputRef}
-                type="text"
+              <textarea
+                ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
                 disabled={loading}
+                rows={1}
                 autoComplete="off"
                 autoCapitalize="off"
                 autoCorrect="off"
                 spellCheck={false}
                 enterKeyHint="send"
                 placeholder={
-                  loading ? "Processing…" : "mkdir public/screenshots"
+                  loading
+                    ? "Processing…"
+                    : "mkdir public/screenshots"
                 }
-                className="flex-1 bg-transparent font-mono text-[14px] text-black outline-none placeholder:text-[#8E8E93] disabled:opacity-50 min-w-0"
+                className="flex-1 bg-transparent font-mono text-[14px] text-black outline-none placeholder:text-[#8E8E93] disabled:opacity-50 min-w-0 resize-none leading-relaxed max-h-[120px] overflow-y-auto custom-scrollbar"
               />
               <button
-                type="submit"
+                type="button"
+                onClick={handleSubmit}
                 disabled={loading || !input.trim()}
                 className="w-8 h-8 flex items-center justify-center rounded-full bg-[#007AFF] active:bg-[#0062CC] text-white transition-colors disabled:opacity-30 shrink-0"
                 aria-label="Run command"
               >
                 <CornerDownLeft className="w-4 h-4" strokeWidth={2.5} />
               </button>
-            </form>
+            </div>
           </motion.div>
         </motion.div>
       )}
