@@ -1,0 +1,21 @@
+/* TEAM */
+Developer: Jitendra Singh
+Contact: https://github.com/jitendra-math
+GitHub: @jitendra-math
+Location: India
+
+/* THANKS */
+Apple: For the Human Interface Guidelines that inspired the design
+GitHub: For the incredible REST API
+Vercel: For the free hosting
+Next.js: For an amazing framework
+Lucide: For the beautiful icons
+
+/* SITE */
+Last Update: 2026-09-25
+Language: English
+Doctype: HTML5
+Framework: Next.js 14
+IDE: VS Code
+Components: React, Tailwind CSS, Framer Motion
+License: MIT

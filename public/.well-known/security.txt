@@ -1,0 +1,16 @@
+# Security Policy for GitH Mobile
+# https://github.jssoriginals.com
+#
+# Please report any security vulnerabilities responsibly.
+# We take all reports seriously and will respond as quickly as possible.
+
+Contact: mailto:i.jitendra.singh0@gmail.com
+Contact: https://github.com/jitendra-math/GitH-Mobile/issues
+Expires: 2027-09-25T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://github.jssoriginals.com/.well-known/security.txt
+Policy: https://github.com/jitendra-math/GitH-Mobile/blob/main/SECURITY.md
+Acknowledgments: https://github.com/jitendra-math/GitH-Mobile/blob/main/THANKS.md
+
+# This file follows the security.txt standard (RFC 9116).
+# Learn more at https://securitytxt.org/

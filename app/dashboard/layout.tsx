@@ -1,5 +1,21 @@
+import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import EditModal from "@/components/EditModal";
+
+// Dashboard should NOT be indexed by search engines — it's an authenticated view
+export const metadata: Metadata = {
+  title: "Dashboard",
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+    },
+  },
+};
 
 export default function DashboardLayout({
   children,
