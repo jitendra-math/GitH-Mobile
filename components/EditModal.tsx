@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   UploadCloud,
   Pencil,
+  Terminal,
 } from "lucide-react";
 import { useEditStore } from "@/store/useEditStore";
 import {
@@ -26,6 +27,7 @@ import AlertModal from "./AlertModal";
 import DangerConfirmModal from "./DangerConfirmModal";
 import FileUploadModal from "./FileUploadModal";
 import CodeEditorModal from "./CodeEditorModal";
+import TerminalModal from "./TerminalModal";
 
 export default function EditModal() {
   const {
@@ -49,6 +51,7 @@ export default function EditModal() {
   const [committing, setCommitting] = useState(false);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [isFileUploadModalOpen, setIsFileUploadModalOpen] = useState(false);
+  const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [copiedStructure, setCopiedStructure] = useState(false);
 
   const [alertConfig, setAlertConfig] = useState({
@@ -303,6 +306,15 @@ export default function EditModal() {
                   <span>Upload</span>
                 </button>
 
+                {/* Terminal */}
+                <button
+                  onClick={() => setIsTerminalOpen(true)}
+                  className="h-8 px-3 flex items-center gap-1.5 rounded-lg bg-[#1C1C1E] active:bg-black text-[#34C759] transition-colors text-[12px] font-semibold shrink-0"
+                >
+                  <Terminal className="w-3.5 h-3.5" strokeWidth={2.5} />
+                  <span>Terminal</span>
+                </button>
+
                 {/* Edit Mode Toggle */}
                 {view === "tree" && (
                   <button
@@ -532,6 +544,15 @@ export default function EditModal() {
           <BulkActionModal
             isOpen={isBulkModalOpen}
             onClose={() => setIsBulkModalOpen(false)}
+            owner={owner}
+            repo={repo}
+            branch={branch}
+            treeData={treeData}
+            setTreeData={setTreeData}
+          />
+          <TerminalModal
+            isOpen={isTerminalOpen}
+            onClose={() => setIsTerminalOpen(false)}
             owner={owner}
             repo={repo}
             branch={branch}
