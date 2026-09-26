@@ -4,10 +4,17 @@ import {
   AlertTriangle,
   XCircle,
   ShieldAlert,
+  CheckCircle2,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-type CalloutType = "info" | "tip" | "warning" | "error" | "danger";
+type CalloutType =
+  | "info"
+  | "tip"
+  | "success"
+  | "warning"
+  | "error"
+  | "danger";
 
 interface HelpCalloutProps {
   type?: CalloutType;
@@ -30,6 +37,11 @@ const CONFIG: Record<
   },
   tip: {
     icon: Lightbulb,
+    color: "#34C759",
+    bg: "rgba(52, 199, 89, 0.08)",
+  },
+  success: {
+    icon: CheckCircle2,
     color: "#34C759",
     bg: "rgba(52, 199, 89, 0.08)",
   },
