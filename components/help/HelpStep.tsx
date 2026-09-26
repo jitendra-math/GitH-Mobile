@@ -1,12 +1,14 @@
 interface HelpStepProps {
   number: number;
   title: string;
+  last?: boolean;
   children?: React.ReactNode;
 }
 
 export default function HelpStep({
   number,
   title,
+  last = false,
   children,
 }: HelpStepProps) {
   return (
@@ -16,13 +18,13 @@ export default function HelpStep({
         <div className="w-7 h-7 rounded-full bg-[#007AFF] text-white text-[14px] font-bold flex items-center justify-center">
           {number}
         </div>
-        {children && (
+        {!last && (
           <div className="w-px flex-1 bg-[#C6C6C8]/50 mt-1.5 min-h-[12px]" />
         )}
       </div>
 
       {/* Right: Content */}
-      <div className="flex-1 min-w-0 pb-3 last:pb-0">
+      <div className={`flex-1 min-w-0 ${last ? "pb-0" : "pb-3"}`}>
         <p className="text-[15px] font-semibold text-black leading-tight">
           {title}
         </p>
