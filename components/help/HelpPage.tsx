@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import type { ReactNode } from "react";
 import HelpHero from "./HelpHero";
 import HelpTOC from "./HelpTOC";
 import HelpSection from "./HelpSection";
@@ -13,7 +14,7 @@ export interface HelpSectionData {
   subtitle?: string;
   icon: LucideIcon;
   defaultOpen?: boolean;
-  content: React.ReactNode;
+  content: ReactNode;
 }
 
 interface HelpPageProps {
