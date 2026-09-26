@@ -8,16 +8,16 @@ interface LandingHeroProps {
 
 export default function LandingHero({ onGetStarted }: LandingHeroProps) {
   return (
-    <section className="px-4 pt-12 pb-8 flex flex-col items-center text-center max-w-screen-md mx-auto">
-      {/* Logo */}
+    <section className="px-4 pt-6 pb-8 flex flex-col items-center text-center max-w-screen-md mx-auto">
+      {/* Hero Banner */}
       <img
-        src="/logo-192.png"
+        src="/hero-banner.png"
         alt="GitH Mobile"
-        className="w-24 h-24 rounded-[24px] object-cover shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
+        className="w-full max-w-[440px] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.10)]"
       />
 
       {/* Title */}
-      <h1 className="text-[34px] font-bold text-black tracking-tight leading-tight mt-6">
+      <h1 className="text-[34px] font-bold text-black tracking-tight leading-tight mt-8">
         GitH Mobile
       </h1>
 

@@ -57,7 +57,7 @@ export const metadata: Metadata = {
   generator: "Next.js",
   referrer: "origin-when-cross-origin",
 
-  // ----- Keywords (Google ignores, but Bing/others use) -----
+  // ----- Keywords -----
   keywords: [
     "GitHub",
     "GitHub mobile",
@@ -116,9 +116,7 @@ export const metadata: Metadata = {
       { url: "/logo-192.png", sizes: "192x192", type: "image/png" },
       { url: "/logo-512.png", sizes: "512x512", type: "image/png" },
     ],
-    apple: [
-      { url: "/logo-192.png", sizes: "192x192", type: "image/png" },
-    ],
+    apple: [{ url: "/logo-192.png", sizes: "192x192", type: "image/png" }],
     shortcut: ["/logo-192.png"],
   },
 
@@ -140,7 +138,7 @@ export const metadata: Metadata = {
     address: false,
   },
 
-  // ----- Open Graph (Facebook, WhatsApp, LinkedIn, etc.) -----
+  // ----- Open Graph (WhatsApp, Facebook, LinkedIn, Telegram, etc.) -----
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
@@ -150,36 +148,13 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "/screenshots/dashboard.jpg",
-        width: 720,
-        height: 1604,
-        alt: "GitH Mobile — Manage all your repositories",
-        type: "image/jpeg",
-      },
-      {
-        url: "/screenshots/edit-modal.jpg",
-        width: 720,
-        height: 1604,
-        alt: "GitH Mobile — Edit files and commit changes",
-        type: "image/jpeg",
-      },
-      {
-        url: "/logo-512.png",
-        width: 512,
-        height: 512,
-        alt: "GitH Mobile logo",
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "GitH Mobile — iOS-style GitHub manager for your phone",
         type: "image/png",
       },
     ],
-  },
-
-  // ----- Twitter / X -----
-  twitter: {
-    card: "summary_large_image",
-    title: SITE_TITLE,
-    description: SITE_DESCRIPTION,
-    images: ["/screenshots/dashboard.jpg"],
-    creator: "@jitendra_math",
   },
 
   // ----- Other Meta Tags -----
