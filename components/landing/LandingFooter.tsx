@@ -6,6 +6,13 @@ export default function LandingFooter() {
     <footer className="px-4 py-8 max-w-screen-md mx-auto pb-safe">
       <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mb-4">
         <Link
+          href="/help"
+          className="text-[14px] text-[#007AFF] active:opacity-60 transition-opacity"
+        >
+          Help
+        </Link>
+        <span className="text-[#C6C6C8]">·</span>
+        <Link
           href="/privacy"
           className="text-[14px] text-[#007AFF] active:opacity-60 transition-opacity"
         >
