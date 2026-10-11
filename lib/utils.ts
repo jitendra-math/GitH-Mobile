@@ -150,11 +150,11 @@ export function escapeHtml(text: string): string {
 }
 
 // Build the final HTML document string from decoded file contents.
-// Uses <pre class="code"> for semantic code blocks.
+// Uses 4-column layout with <pre class="code"> for semantic code blocks.
 export function buildExportHtml(
   files: Array<{ path: string; content: string }>
 ): string {
-  const templateHead = `<link href="https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet"><style>@font-face{font-family:'SF Pro Text Ultralight';src:url('https://pdftoimgjss.vercel.app/fonts/sf-pro-text_ultralight.woff') format('woff');font-weight:200;font-style:normal;font-display:swap;}@font-face{font-family:'SF Pro Text';src:url('https://pdftoimgjss.vercel.app/fonts/sf-pro-text_regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}.pdf-doc{font-family:'SF Pro Text Ultralight',sans-serif;font-size:12px;line-height:1.05;color:#1e1e1e;padding:0;margin:0}.pdf-doc .filename{font-family:'SF Pro Text',sans-serif;font-weight:700;font-size:12px;line-height:1.05;display:block;margin:8px 0 2px 0;color:#000}.pdf-doc .filename:first-child{margin-top:0}.pdf-doc pre.code{font-family:'SF Pro Text Ultralight',monospace;font-size:11px;line-height:1.2;display:block;margin:0 0 6px 0;padding:0;white-space:pre-wrap;word-break:break-word;color:#1e1e1e;background:transparent;border:none;tab-size:2}</style><div class="pdf-doc">`;
+  const templateHead = `<link href="https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet"><style>@font-face{font-family:'SF Pro Text Ultralight';src:url('https://pdftoimgjss.vercel.app/fonts/sf-pro-text_ultralight.woff') format('woff');font-weight:200;font-style:normal;font-display:swap;}@font-face{font-family:'SF Pro Text';src:url('https://pdftoimgjss.vercel.app/fonts/sf-pro-text_regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}.pdf-doc{font-family:'SF Pro Text Ultralight',sans-serif;font-size:12px;line-height:1.05;color:#1e1e1e;padding:0;margin:0;column-count:4;column-gap:14px;column-rule:1px solid #C6C6C8}.pdf-doc .filename{font-family:'SF Pro Text',sans-serif;font-weight:700;font-size:12px;line-height:1.05;display:block;margin:8px 0 2px 0;color:#000}.pdf-doc .filename:first-child{margin-top:0}.pdf-doc pre.code{font-family:'SF Pro Text Ultralight',monospace;font-size:11px;line-height:1.2;display:block;margin:0 0 6px 0;padding:0;white-space:pre-wrap;word-break:break-word;color:#1e1e1e;background:transparent;border:none;tab-size:2}</style><div class="pdf-doc">`;
 
   const templateTail = `</div>`;
 
