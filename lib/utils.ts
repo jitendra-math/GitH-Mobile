@@ -92,3 +92,79 @@ export function fileToBase64(file: File): Promise<string> {
     reader.onerror = (error) => reject(error);
   });
 }
+
+// ============================================
+// EXPORT HTML HELPERS
+// ============================================
+
+// Binary file extensions — these are skipped during HTML export
+const BINARY_EXTENSIONS = new Set([
+  // Images
+  "png", "jpg", "jpeg", "gif", "ico", "webp", "bmp", "tiff", "tif", "avif", "heic",
+  // Fonts
+  "woff", "woff2", "ttf", "otf", "eot",
+  // Audio / Video
+  "mp3", "wav", "ogg", "m4a", "flac", "mp4", "mov", "avi", "mkv", "webm", "flv", "wmv",
+  // Archives
+  "zip", "tar", "gz", "rar", "7z", "jar", "apk", "dmg", "iso", "bz2", "xz",
+  // Documents
+  "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "odt", "ods", "odp",
+  // Binaries / Executables
+  "exe", "dll", "so", "dylib", "bin", "wasm", "class", "pyc", "o", "a",
+  // Databases
+  "db", "sqlite", "sqlite3", "mdb",
+]);
+
+// Binary filenames (lock files that contain binary-ish content)
+const BINARY_FILENAMES = new Set([
+  "package-lock.json",
+  "yarn.lock",
+  "pnpm-lock.yaml",
+  "cargo.lock",
+  "composer.lock",
+  "gemfile.lock",
+  "poetry.lock",
+  "pipfile.lock",
+]);
+
+// Returns true if the path looks like a binary file
+export function isBinaryPath(path: string): boolean {
+  const lower = path.toLowerCase();
+  const filename = lower.split("/").pop() || "";
+
+  if (BINARY_FILENAMES.has(filename)) return true;
+
+  if (!lower.includes(".")) return false;
+  const ext = lower.split(".").pop() || "";
+  return BINARY_EXTENSIONS.has(ext);
+}
+
+// Escape HTML special characters — order matters (& must be first)
+export function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+// Build the final HTML document string from decoded file contents.
+// Uses <pre class="code"> for semantic code blocks.
+export function buildExportHtml(
+  files: Array<{ path: string; content: string }>
+): string {
+  const templateHead = `<link href="https://fonts.googleapis.com/css2?family=Vesper+Libre:wght@400;700&display=swap" rel="stylesheet"><style>@font-face{font-family:'SF Pro Text Ultralight';src:url('https://pdftoimgjss.vercel.app/fonts/sf-pro-text_ultralight.woff') format('woff');font-weight:200;font-style:normal;font-display:swap;}@font-face{font-family:'SF Pro Text';src:url('https://pdftoimgjss.vercel.app/fonts/sf-pro-text_regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap;}.pdf-doc{font-family:'SF Pro Text Ultralight',sans-serif;font-size:12px;line-height:1.05;color:#1e1e1e;padding:0;margin:0}.pdf-doc .filename{font-family:'SF Pro Text',sans-serif;font-weight:700;font-size:12px;line-height:1.05;display:block;margin:8px 0 2px 0;color:#000}.pdf-doc .filename:first-child{margin-top:0}.pdf-doc pre.code{font-family:'SF Pro Text Ultralight',monospace;font-size:11px;line-height:1.2;display:block;margin:0 0 6px 0;padding:0;white-space:pre-wrap;word-break:break-word;color:#1e1e1e;background:transparent;border:none;tab-size:2}</style><div class="pdf-doc">`;
+
+  const templateTail = `</div>`;
+
+  const body = files
+    .map((file) => {
+      const safePath = escapeHtml(file.path);
+      const safeContent = escapeHtml(file.content);
+      return `<span class="filename">${safePath}</span><pre class="code">${safeContent}</pre>`;
+    })
+    .join("");
+
+  return templateHead + body + templateTail;
+}

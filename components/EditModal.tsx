@@ -12,6 +12,7 @@ import {
   UploadCloud,
   Pencil,
   Terminal,
+  FileCode2,
 } from "lucide-react";
 import { useEditStore } from "@/store/useEditStore";
 import {
@@ -28,6 +29,7 @@ import DangerConfirmModal from "./DangerConfirmModal";
 import FileUploadModal from "./FileUploadModal";
 import CodeEditorModal from "./CodeEditorModal";
 import TerminalModal from "./TerminalModal";
+import ExportHtmlModal from "./ExportHtmlModal";
 
 export default function EditModal() {
   const {
@@ -52,6 +54,7 @@ export default function EditModal() {
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [isFileUploadModalOpen, setIsFileUploadModalOpen] = useState(false);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+  const [isExportHtmlOpen, setIsExportHtmlOpen] = useState(false);
   const [copiedStructure, setCopiedStructure] = useState(false);
 
   const [alertConfig, setAlertConfig] = useState({
@@ -295,6 +298,15 @@ export default function EditModal() {
                     <Copy className="w-3.5 h-3.5" strokeWidth={2.5} />
                   )}
                   <span>{copiedStructure ? "Copied!" : "Copy Structure"}</span>
+                </button>
+
+                {/* Export HTML */}
+                <button
+                  onClick={() => setIsExportHtmlOpen(true)}
+                  className="h-8 px-3 flex items-center gap-1.5 rounded-lg bg-white border border-[#C6C6C8]/60 text-black active:bg-[#E5E5EA] transition-colors text-[12px] font-semibold shrink-0"
+                >
+                  <FileCode2 className="w-3.5 h-3.5" strokeWidth={2.5} />
+                  <span>Export HTML</span>
                 </button>
 
                 {/* Upload */}
@@ -558,6 +570,13 @@ export default function EditModal() {
             branch={branch}
             treeData={treeData}
             setTreeData={setTreeData}
+          />
+          <ExportHtmlModal
+            isOpen={isExportHtmlOpen}
+            onClose={() => setIsExportHtmlOpen(false)}
+            owner={owner}
+            repo={repo}
+            branch={branch}
           />
           <AlertModal
             isOpen={alertConfig.isOpen}
