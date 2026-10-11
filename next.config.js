@@ -62,6 +62,44 @@ const withPWA = require("@ducanh2912/next-pwa").default({
   },
 });
 
+// ============================================
+// Reusable header blocks
+// ============================================
+const CACHE_IMMUTABLE = {
+  key: "Cache-Control",
+  value: "public, max-age=31536000, immutable",
+};
+
+// Public assets that are safe to expose cross-origin (logo, screenshots,
+// fonts, icons, OG images, etc.). These are meant to be consumed by
+// external tools (e.g. canvas/video generators, social embeds).
+const CORS_PUBLIC = {
+  key: "Access-Control-Allow-Origin",
+  value: "*",
+};
+
+const CROSS_ORIGIN_RESOURCE_POLICY = {
+  key: "Cross-Origin-Resource-Policy",
+  value: "cross-origin",
+};
+
+// ============================================
+// List of static public asset paths that need CORS
+// ============================================
+const PUBLIC_ASSET_PATHS = [
+  "/logo-:size.png",
+  "/logo.png",
+  "/hero-banner.png",
+  "/og-image.png",
+  "/favicon.ico",
+  "/browserconfig.xml",
+  "/manifest.json",
+  "/humans.txt",
+  "/screenshots/:path*",
+  "/fonts/:path*",
+  "/.well-known/:path*",
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -71,81 +109,63 @@ const nextConfig = {
   // Security Headers (SEO + Trust Signals)
   // ============================================
   async headers() {
+    const publicAssetHeaders = [
+      CACHE_IMMUTABLE,
+      CORS_PUBLIC,
+      CROSS_ORIGIN_RESOURCE_POLICY,
+    ];
+
     return [
+      // --------------------------------------------
+      // Global headers (all routes)
+      // --------------------------------------------
       {
         source: "/:path*",
         headers: [
-          // HSTS — force HTTPS for 2 years
           {
             key: "Strict-Transport-Security",
             value: "max-age=63072000; includeSubDomains; preload",
           },
-          // Prevent clickjacking
           {
             key: "X-Frame-Options",
             value: "SAMEORIGIN",
           },
-          // Prevent MIME-type sniffing
           {
             key: "X-Content-Type-Options",
             value: "nosniff",
           },
-          // Referrer policy — send origin only on cross-origin
           {
             key: "Referrer-Policy",
             value: "strict-origin-when-cross-origin",
           },
-          // Restrict browser features (permissions policy)
           {
             key: "Permissions-Policy",
             value:
               "camera=(), microphone=(), geolocation=(), interest-cohort=()",
           },
-          // XSS protection (legacy browsers)
           {
             key: "X-XSS-Protection",
             value: "1; mode=block",
           },
-          // DNS prefetch control
           {
             key: "X-DNS-Prefetch-Control",
             value: "on",
           },
         ],
       },
-      // ============================================
-      // Cache Headers for Static Assets
-      // ============================================
-      {
-        source: "/logo-:size.png",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
-      {
-        source: "/screenshots/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
-      {
-        source: "/fonts/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
-      // ============================================
-      // Service Worker should never be cached
-      // ============================================
+
+      // --------------------------------------------
+      // Public assets — CORS enabled + long cache
+      // (logo, screenshots, fonts, icons, og-image)
+      // --------------------------------------------
+      ...PUBLIC_ASSET_PATHS.map((source) => ({
+        source,
+        headers: publicAssetHeaders,
+      })),
+
+      // --------------------------------------------
+      // Service Worker — never cached, no CORS
+      // --------------------------------------------
       {
         source: "/sw.js",
         headers: [
